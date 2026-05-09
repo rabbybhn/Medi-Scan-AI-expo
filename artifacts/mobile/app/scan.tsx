@@ -107,12 +107,24 @@ export default function ScanScreen() {
         <View style={styles.controls}>
           <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
             <Pressable onPress={handleCapture} disabled={isCapturing} style={({ pressed }) => [styles.captureBtn, { opacity: pressed ? 0.85 : 1 }]}>
-              {isCapturing ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="camera" size={32} color="#fff" />}
+              <Ionicons name="camera" size={32} color="#fff" />
             </Pressable>
           </Animated.View>
-          <Text style={styles.captureLabel}>{isCapturing ? "Scanning..." : "Tap to Capture"}</Text>
+          <Text style={styles.captureLabel}>Tap to Capture</Text>
         </View>
       </LinearGradient>
+
+      {isCapturing && (
+        <View style={styles.loadingOverlay}>
+          <View style={styles.loadingBox}>
+            <ActivityIndicator color="#0052cc" size="large" />
+            <Text style={styles.loadingTitle}>Please Wait</Text>
+            <Text style={styles.loadingMessage}>
+              We are working to fetch information..
+            </Text>
+          </View>
+        </View>
+      )}
     </View>
   );
 }
@@ -146,6 +158,27 @@ const styles = StyleSheet.create({
     borderWidth: 3, borderColor: "rgba(255,255,255,0.35)",
   },
   captureLabel: { color: "rgba(255,255,255,0.85)", fontSize: 14, fontFamily: "Inter_500Medium", letterSpacing: 0.2 },
+  loadingOverlay: {
+    position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.72)",
+    alignItems: "center", justifyContent: "center",
+  },
+  loadingBox: {
+    backgroundColor: "#fff", borderRadius: 20,
+    paddingVertical: 36, paddingHorizontal: 40,
+    alignItems: "center", gap: 14,
+    marginHorizontal: 32,
+    shadowColor: "#000", shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25, shadowRadius: 24, elevation: 12,
+  },
+  loadingTitle: {
+    fontSize: 18, fontFamily: "Manrope_700Bold", fontWeight: "700",
+    color: "#0a1628", letterSpacing: -0.3,
+  },
+  loadingMessage: {
+    fontSize: 14, fontFamily: "Inter_400Regular", color: "#5a6a85",
+    textAlign: "center", lineHeight: 21,
+  },
   permissionTitle: { fontSize: 22, fontWeight: "700" as const, fontFamily: "Manrope_700Bold", textAlign: "center" },
   permissionSubtitle: { fontSize: 15, textAlign: "center", fontFamily: "Inter_400Regular", lineHeight: 22 },
   permissionBtn: { paddingHorizontal: 32, paddingVertical: 14, borderRadius: 8, marginTop: 8 },
