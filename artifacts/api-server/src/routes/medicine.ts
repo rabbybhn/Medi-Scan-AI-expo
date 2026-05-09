@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { ai } from "@workspace/integrations-gemini-ai";
+import { GoogleGenAI } from "@google/genai";
 import { db } from "@workspace/db";
 import { scanHistoryTable } from "@workspace/db/schema";
 import { desc, eq } from "drizzle-orm";
@@ -7,6 +7,7 @@ import { ObjectStorageService } from "../lib/objectStorage.js";
 
 const router = Router();
 const storage = new ObjectStorageService();
+const genai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 const SYSTEM_PROMPT = `You are a pharmaceutical expert assistant. When shown an image of medicine (pill, tablet, capsule, bottle, blister pack, or packaging), identify it and provide accurate, helpful information.
 
@@ -52,7 +53,7 @@ router.post("/medicine/analyze", async (req, res) => {
     : imageBase64;
 
   const [aiResponse, imageUrl] = await Promise.all([
-    ai.models.generateContent({
+    genai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: [
         {
