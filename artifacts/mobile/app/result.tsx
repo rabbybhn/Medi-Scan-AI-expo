@@ -281,7 +281,7 @@ export default function ResultScreen() {
 
             <TouchableOpacity
               style={[styles.scanAgainBtn, { backgroundColor: colors.primary }]}
-              onPress={() => router.back()}
+              onPress={() => router.push("/scan")}
             >
               <MaterialCommunityIcons name="line-scan" size={20} color={colors.primaryForeground} />
               <Text style={[styles.scanAgainText, { color: colors.primaryForeground }]}>

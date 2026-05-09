@@ -1,55 +1,65 @@
 const colors = {
   light: {
-    text: "#0f172a",
-    tint: "#0ea5e9",
+    text: "#051a3e",
+    tint: "#0052cc",
 
-    background: "#f8fafc",
-    foreground: "#0f172a",
+    background: "#faf9ff",
+    foreground: "#051a3e",
 
     card: "#ffffff",
-    cardForeground: "#0f172a",
+    cardForeground: "#051a3e",
 
-    primary: "#0ea5e9",
+    primary: "#0052cc",
     primaryForeground: "#ffffff",
 
-    secondary: "#e0f2fe",
-    secondaryForeground: "#0369a1",
+    secondary: "#e9edff",
+    secondaryForeground: "#051a3e",
 
-    muted: "#f1f5f9",
-    mutedForeground: "#64748b",
+    muted: "#f1f3ff",
+    mutedForeground: "#434654",
 
-    accent: "#06b6d4",
+    accent: "#003d9b",
     accentForeground: "#ffffff",
 
-    destructive: "#ef4444",
+    destructive: "#ba1a1a",
     destructiveForeground: "#ffffff",
 
-    border: "#e2e8f0",
-    input: "#e2e8f0",
+    border: "#c3c6d6",
+    input: "#c3c6d6",
 
-    // App-specific
-    scanOverlay: "rgba(14, 165, 233, 0.15)",
-    scanBorder: "#0ea5e9",
-    success: "#10b981",
+    // Design system extras
+    surfaceContainerLow: "#f1f3ff",
+    surfaceContainer: "#e9edff",
+    surfaceContainerHigh: "#e1e8ff",
+    surfaceContainerHighest: "#d8e2ff",
+    onSurfaceVariant: "#434654",
+    outline: "#737685",
+    outlineVariant: "#c3c6d6",
+    inverseSurface: "#1d3054",
+    inverseOnSurface: "#edf0ff",
+
+    success: "#1a8a4a",
     successForeground: "#ffffff",
-    warning: "#f59e0b",
-    warningForeground: "#ffffff",
+    successContainer: "#e6f4ec",
+
+    warning: "#b45309",
+    warningContainer: "#fef3c7",
+
     surface: "#ffffff",
-    surfaceDark: "#0f172a",
   },
 
   dark: {
-    text: "#f1f5f9",
-    tint: "#38bdf8",
+    text: "#edf0ff",
+    tint: "#b2c5ff",
 
     background: "#0a0f1e",
-    foreground: "#f1f5f9",
+    foreground: "#edf0ff",
 
     card: "#111827",
-    cardForeground: "#f1f5f9",
+    cardForeground: "#edf0ff",
 
-    primary: "#38bdf8",
-    primaryForeground: "#0a0f1e",
+    primary: "#b2c5ff",
+    primaryForeground: "#001848",
 
     secondary: "#1e293b",
     secondaryForeground: "#94a3b8",
@@ -57,8 +67,8 @@ const colors = {
     muted: "#1e293b",
     mutedForeground: "#64748b",
 
-    accent: "#06b6d4",
-    accentForeground: "#0a0f1e",
+    accent: "#dae2ff",
+    accentForeground: "#001848",
 
     destructive: "#ef4444",
     destructiveForeground: "#ffffff",
@@ -66,17 +76,27 @@ const colors = {
     border: "#1e293b",
     input: "#1e293b",
 
-    scanOverlay: "rgba(56, 189, 248, 0.12)",
-    scanBorder: "#38bdf8",
+    surfaceContainerLow: "#111827",
+    surfaceContainer: "#1e293b",
+    surfaceContainerHigh: "#1e293b",
+    surfaceContainerHighest: "#334155",
+    onSurfaceVariant: "#94a3b8",
+    outline: "#475569",
+    outlineVariant: "#334155",
+    inverseSurface: "#edf0ff",
+    inverseOnSurface: "#1d3054",
+
     success: "#10b981",
     successForeground: "#ffffff",
+    successContainer: "#064e3b",
+
     warning: "#f59e0b",
-    warningForeground: "#ffffff",
+    warningContainer: "#451a03",
+
     surface: "#111827",
-    surfaceDark: "#0a0f1e",
   },
 
-  radius: 14,
+  radius: 8,
 };
 
 export default colors;

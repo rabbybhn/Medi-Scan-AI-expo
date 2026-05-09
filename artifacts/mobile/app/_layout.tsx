@@ -3,8 +3,13 @@ import {
   Inter_500Medium,
   Inter_600SemiBold,
   Inter_700Bold,
-  useFonts,
+  useFonts as useInterFonts,
 } from "@expo-google-fonts/inter";
+import {
+  Manrope_600SemiBold,
+  Manrope_700Bold,
+  useFonts as useManropeFonts,
+} from "@expo-google-fonts/manrope";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { setBaseUrl } from "@workspace/api-client-react";
 import { Stack } from "expo-router";
@@ -16,7 +21,6 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
-// Set API base URL for all requests
 if (process.env.EXPO_PUBLIC_DOMAIN) {
   setBaseUrl(`https://${process.env.EXPO_PUBLIC_DOMAIN}`);
 }
@@ -28,39 +32,42 @@ const queryClient = new QueryClient();
 function RootLayoutNav() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen
-        name="result"
-        options={{
-          headerShown: false,
-          presentation: "card",
-        }}
-      />
+      <Stack.Screen name="index" />
+      <Stack.Screen name="scan" options={{ presentation: "fullScreenModal" }} />
+      <Stack.Screen name="result" options={{ presentation: "card" }} />
     </Stack>
   );
 }
 
 export default function RootLayout() {
-  const [fontsLoaded, fontError] = useFonts({
+  const [interLoaded, interError] = useInterFonts({
     Inter_400Regular,
     Inter_500Medium,
     Inter_600SemiBold,
     Inter_700Bold,
   });
 
+  const [manropeLoaded, manropeError] = useManropeFonts({
+    Manrope_600SemiBold,
+    Manrope_700Bold,
+  });
+
+  const loaded = interLoaded && manropeLoaded;
+  const error = interError ?? manropeError;
+
   useEffect(() => {
-    if (fontsLoaded || fontError) {
+    if (loaded || error) {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded, fontError]);
+  }, [loaded, error]);
 
-  if (!fontsLoaded && !fontError) return null;
+  if (!loaded && !error) return null;
 
   return (
     <SafeAreaProvider>
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
-          <GestureHandlerRootView>
+          <GestureHandlerRootView style={{ flex: 1 }}>
             <KeyboardProvider>
               <RootLayoutNav />
             </KeyboardProvider>
