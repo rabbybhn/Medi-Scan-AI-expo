@@ -17,7 +17,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons, MaterialCommunityIcons, FontAwesome5, Feather } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
-import { useAuth } from "@/lib/auth";
+import { addScanToHistory } from "@/hooks/useLocalHistory";
 
 interface MedicineResult {
   identified: boolean;
@@ -94,7 +94,6 @@ export default function ResultScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const colors = useColors();
-  const { user } = useAuth();
   const [result, setResult] = useState<MedicineResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -111,17 +110,27 @@ export default function ResultScreen() {
         const response = await fetch(`${baseUrl}/api/medicine/analyze`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ imageBase64, userEmail: user?.email ?? "anonymous" }),
+          body: JSON.stringify({ imageBase64 }),
         });
 
-        if (!response.ok) {
-          throw new Error(`Server error: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`Server error: ${response.status}`);
 
         const data = (await response.json()) as MedicineResult;
         setResult(data);
+
+        await addScanToHistory({
+          name: data.name,
+          dosage: data.dosage,
+          primaryUse: data.primaryUse,
+          approximatePrice: data.approximatePrice,
+          generalInfo: data.generalInfo,
+          warnings: data.warnings,
+          identified: data.identified,
+          imageUri: imageUri ?? null,
+        });
+
         await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      } catch (err) {
+      } catch {
         setError("Could not analyze medicine. Please try again.");
         await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       } finally {
@@ -134,14 +143,11 @@ export default function ResultScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* Header */}
       <View style={[styles.header, { paddingTop: topPad + 8, borderBottomColor: colors.border }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="chevron-back" size={24} color={colors.foreground} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.foreground }]}>
-          Analysis Result
-        </Text>
+        <Text style={[styles.headerTitle, { color: colors.foreground }]}>Analysis Result</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -150,18 +156,10 @@ export default function ResultScreen() {
         contentContainerStyle={[styles.scrollContent, { paddingBottom: bottomPad + 24 }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Captured image */}
         {imageUri ? (
           <View style={styles.imageWrap}>
-            <Image
-              source={{ uri: imageUri }}
-              style={styles.capturedImage}
-              contentFit="cover"
-            />
-            <LinearGradient
-              colors={["transparent", "rgba(0,0,0,0.5)"]}
-              style={StyleSheet.absoluteFill}
-            />
+            <Image source={{ uri: imageUri }} style={styles.capturedImage} contentFit="cover" />
+            <LinearGradient colors={["transparent", "rgba(0,0,0,0.5)"]} style={StyleSheet.absoluteFill} />
           </View>
         ) : null}
 
@@ -169,9 +167,7 @@ export default function ResultScreen() {
           <View style={styles.loadingContainer}>
             <View style={[styles.loadingCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
               <ActivityIndicator size="large" color={colors.primary} />
-              <Text style={[styles.loadingTitle, { color: colors.foreground }]}>
-                Analyzing Medicine
-              </Text>
+              <Text style={[styles.loadingTitle, { color: colors.foreground }]}>Analyzing Medicine</Text>
               <Text style={[styles.loadingSubtitle, { color: colors.mutedForeground }]}>
                 AI is identifying your medicine...
               </Text>
@@ -188,9 +184,7 @@ export default function ResultScreen() {
                 style={[styles.retryBtn, { backgroundColor: colors.primary }]}
                 onPress={() => router.back()}
               >
-                <Text style={[styles.retryBtnText, { color: colors.primaryForeground }]}>
-                  Try Again
-                </Text>
+                <Text style={[styles.retryBtnText, { color: colors.primaryForeground }]}>Try Again</Text>
               </Pressable>
             </View>
           </View>
@@ -198,21 +192,14 @@ export default function ResultScreen() {
 
         {result && !loading && (
           <View style={styles.resultContainer}>
-            {/* Medicine name + identified badge */}
             <View style={styles.nameRow}>
               <View style={{ flex: 1 }}>
-                <Text style={[styles.medicineName, { color: colors.foreground }]}>
-                  {result.name}
-                </Text>
+                <Text style={[styles.medicineName, { color: colors.foreground }]}>{result.name}</Text>
               </View>
               <View
                 style={[
                   styles.badge,
-                  {
-                    backgroundColor: result.identified
-                      ? colors.success + "22"
-                      : colors.warning + "22",
-                  },
+                  { backgroundColor: result.identified ? colors.success + "22" : colors.warning + "22" },
                 ]}
               >
                 <Ionicons
@@ -232,46 +219,11 @@ export default function ResultScreen() {
             </View>
 
             <View style={styles.cards}>
-              <InfoCard
-                icon="medical"
-                iconLib="Ionicons"
-                label="Primary Use"
-                value={result.primaryUse}
-                accent="#0ea5e9"
-                colors={colors}
-              />
-              <InfoCard
-                icon="pill"
-                iconLib="MaterialCommunityIcons"
-                label="Dosage"
-                value={result.dosage}
-                accent="#8b5cf6"
-                colors={colors}
-              />
-              <InfoCard
-                icon="tag"
-                iconLib="Feather"
-                label="Approximate Price"
-                value={result.approximatePrice}
-                accent="#10b981"
-                colors={colors}
-              />
-              <InfoCard
-                icon="information-circle-outline"
-                iconLib="Ionicons"
-                label="General Information"
-                value={result.generalInfo}
-                accent="#06b6d4"
-                colors={colors}
-              />
-              <InfoCard
-                icon="warning-outline"
-                iconLib="Ionicons"
-                label="Warnings & Side Effects"
-                value={result.warnings}
-                accent="#f59e0b"
-                colors={colors}
-              />
+              <InfoCard icon="medical" iconLib="Ionicons" label="Primary Use" value={result.primaryUse} accent="#0ea5e9" colors={colors} />
+              <InfoCard icon="pill" iconLib="MaterialCommunityIcons" label="Dosage" value={result.dosage} accent="#8b5cf6" colors={colors} />
+              <InfoCard icon="tag" iconLib="Feather" label="Approximate Price" value={result.approximatePrice} accent="#10b981" colors={colors} />
+              <InfoCard icon="information-circle-outline" iconLib="Ionicons" label="General Information" value={result.generalInfo} accent="#06b6d4" colors={colors} />
+              <InfoCard icon="warning-outline" iconLib="Ionicons" label="Warnings & Side Effects" value={result.warnings} accent="#f59e0b" colors={colors} />
             </View>
 
             <View style={[styles.disclaimer, { backgroundColor: colors.muted, borderColor: colors.border }]}>
@@ -299,92 +251,31 @@ export default function ResultScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
+  header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, paddingBottom: 12, borderBottomWidth: StyleSheet.hairlineWidth },
   backBtn: { width: 40, height: 40, alignItems: "center", justifyContent: "center" },
   headerTitle: { fontSize: 17, fontWeight: "600" as const, fontFamily: "Inter_600SemiBold" },
   scrollContent: { paddingHorizontal: 0 },
   imageWrap: { height: 220, overflow: "hidden", backgroundColor: "#000" },
   capturedImage: { width: "100%", height: "100%" },
   loadingContainer: { padding: 24 },
-  loadingCard: {
-    borderRadius: 20,
-    padding: 36,
-    alignItems: "center",
-    gap: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-  },
+  loadingCard: { borderRadius: 20, padding: 36, alignItems: "center", gap: 12, borderWidth: StyleSheet.hairlineWidth },
   loadingTitle: { fontSize: 18, fontWeight: "600" as const, fontFamily: "Inter_600SemiBold", textAlign: "center" },
   loadingSubtitle: { fontSize: 14, fontFamily: "Inter_400Regular", textAlign: "center" },
   retryBtn: { paddingHorizontal: 28, paddingVertical: 12, borderRadius: 24, marginTop: 8 },
   retryBtnText: { fontSize: 15, fontWeight: "600" as const, fontFamily: "Inter_600SemiBold" },
   resultContainer: { padding: 20, gap: 16 },
-  nameRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 12,
-    flexWrap: "wrap",
-  },
-  medicineName: {
-    fontSize: 24,
-    fontWeight: "700" as const,
-    fontFamily: "Inter_700Bold",
-    letterSpacing: -0.5,
-    lineHeight: 30,
-  },
-  badge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 20,
-    marginTop: 4,
-  },
+  nameRow: { flexDirection: "row", alignItems: "flex-start", gap: 12, flexWrap: "wrap" },
+  medicineName: { fontSize: 24, fontWeight: "700" as const, fontFamily: "Inter_700Bold", letterSpacing: -0.5, lineHeight: 30 },
+  badge: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20, marginTop: 4 },
   badgeText: { fontSize: 12, fontWeight: "600" as const, fontFamily: "Inter_600SemiBold" },
   cards: { gap: 10 },
-  infoCard: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 14,
-    padding: 16,
-    borderRadius: 16,
-    borderWidth: StyleSheet.hairlineWidth,
-  },
-  infoIconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
+  infoCard: { flexDirection: "row", alignItems: "flex-start", gap: 14, padding: 16, borderRadius: 16, borderWidth: StyleSheet.hairlineWidth },
+  infoIconWrap: { width: 40, height: 40, borderRadius: 12, alignItems: "center", justifyContent: "center", flexShrink: 0 },
   infoContent: { flex: 1, gap: 3 },
   infoLabel: { fontSize: 12, fontFamily: "Inter_500Medium", textTransform: "uppercase", letterSpacing: 0.6 },
   infoValue: { fontSize: 15, fontFamily: "Inter_400Regular", lineHeight: 22 },
-  disclaimer: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 8,
-    padding: 14,
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-  },
+  disclaimer: { flexDirection: "row", alignItems: "flex-start", gap: 8, padding: 14, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth },
   disclaimerText: { fontSize: 12, fontFamily: "Inter_400Regular", flex: 1, lineHeight: 18 },
-  scanAgainBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingVertical: 16,
-    borderRadius: 30,
-    marginTop: 4,
-  },
+  scanAgainBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 16, borderRadius: 30, marginTop: 4 },
   scanAgainText: { fontSize: 16, fontWeight: "600" as const, fontFamily: "Inter_600SemiBold" },
 });

@@ -1,6 +1,5 @@
 import React, { useRef, useState } from "react";
 import {
-  ActivityIndicator,
   Animated,
   Modal,
   Platform,
@@ -14,24 +13,11 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
-import { useAuth } from "@/lib/auth";
+import { useLocalHistory, type LocalScanItem } from "@/hooks/useLocalHistory";
 
 const DRAWER_WIDTH = 300;
-
-interface ScanHistoryItem {
-  id: number;
-  name: string;
-  dosage: string;
-  primaryUse: string;
-  approximatePrice: string;
-  generalInfo: string;
-  warnings: string;
-  identified: boolean;
-  createdAt: string;
-}
 
 function timeAgo(dateStr: string): string {
   const now = Date.now();
@@ -68,20 +54,11 @@ function BottomTab({
   );
 }
 
-function DrawerMenu({
-  visible,
-  onClose,
-  user,
-}: {
-  visible: boolean;
-  onClose: () => void;
-  user: { name: string; email: string; avatar: string } | null;
-}) {
+function DrawerMenu({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const slideAnim = useRef(new Animated.Value(-DRAWER_WIDTH)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
-
   const native = Platform.OS !== "web";
 
   React.useEffect(() => {
@@ -99,37 +76,23 @@ function DrawerMenu({
   }, [visible]);
 
   const menuItems = [
-    {
-      icon: "information-circle-outline",
-      label: "About This App",
-      sub: "Version 1.0.0 • Medi Scan AI",
-    },
-    {
-      icon: "language-outline",
-      label: "Change App Language",
-      sub: "English (default)",
-    },
-    {
-      icon: "code-slash-outline",
-      label: "About Developers",
-      sub: "Built with care for your health",
-    },
+    { icon: "information-circle-outline", label: "About This App", sub: "Version 1.0.0 • Medi Scan AI" },
+    { icon: "language-outline", label: "Change App Language", sub: "English (default)" },
+    { icon: "code-slash-outline", label: "About Developers", sub: "Built with care for your health" },
   ];
 
   return (
     <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}>
-      {/* Backdrop */}
       <Animated.View style={[styles.drawerBackdrop, { opacity: fadeAnim }]}>
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
       </Animated.View>
 
-      {/* Drawer panel */}
       <Animated.View
         style={[
           styles.drawer,
           {
             backgroundColor: colors.card,
-            paddingTop: insets.top + 16,
+            paddingTop: insets.top + 20,
             paddingBottom: insets.bottom + 24,
             transform: [{ translateX: slideAnim }],
           },
@@ -137,18 +100,12 @@ function DrawerMenu({
       >
         {/* Drawer header */}
         <View style={[styles.drawerHeader, { borderBottomColor: colors.outlineVariant }]}>
-          <View style={[styles.drawerAvatar, { backgroundColor: "#e6edff" }]}>
-            <Text style={[styles.drawerAvatarText, { color: "#003d9b" }]}>
-              {(user?.firstName?.[0] ?? user?.email?.[0] ?? "U").toUpperCase()}
-            </Text>
+          <View style={[styles.drawerLogoWrap, { backgroundColor: colors.primary }]}>
+            <MaterialCommunityIcons name="shield-plus-outline" size={22} color="#fff" />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.drawerName, { color: colors.foreground }]}>
-              {user?.firstName ? `${user.firstName} ${user.lastName ?? ""}`.trim() : "Guest"}
-            </Text>
-            <Text style={[styles.drawerEmail, { color: colors.mutedForeground }]} numberOfLines={1}>
-              {user?.email ?? ""}
-            </Text>
+            <Text style={[styles.drawerTitle, { color: colors.foreground }]}>Medi Scan AI</Text>
+            <Text style={[styles.drawerSubtitle, { color: colors.mutedForeground }]}>Your health companion</Text>
           </View>
           <TouchableOpacity onPress={onClose} style={styles.drawerCloseBtn}>
             <Ionicons name="close" size={22} color={colors.mutedForeground} />
@@ -171,19 +128,14 @@ function DrawerMenu({
                 <Ionicons name={item.icon as never} size={20} color="#003d9b" />
               </View>
               <View style={{ flex: 1, gap: 2 }}>
-                <Text style={[styles.drawerItemLabel, { color: colors.foreground }]}>
-                  {item.label}
-                </Text>
-                <Text style={[styles.drawerItemSub, { color: colors.mutedForeground }]}>
-                  {item.sub}
-                </Text>
+                <Text style={[styles.drawerItemLabel, { color: colors.foreground }]}>{item.label}</Text>
+                <Text style={[styles.drawerItemSub, { color: colors.mutedForeground }]}>{item.sub}</Text>
               </View>
               <Ionicons name="chevron-forward" size={16} color={colors.outlineVariant} />
             </TouchableOpacity>
           ))}
         </View>
 
-        {/* App branding at bottom */}
         <View style={styles.drawerFooter}>
           <MaterialCommunityIcons name="shield-plus-outline" size={18} color={colors.outline} />
           <Text style={[styles.drawerFooterText, { color: colors.outline }]}>Medi Scan AI</Text>
@@ -197,32 +149,17 @@ export default function HomeScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { user } = useAuth();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const topPad = Platform.OS === "web" ? 52 : insets.top;
   const bottomPad = Platform.OS === "web" ? 20 : insets.bottom;
 
-  const baseUrl = `https://${process.env.EXPO_PUBLIC_DOMAIN}`;
-
-  const { data, isLoading, isRefetching, refetch } = useQuery({
-    queryKey: ["medicineHistory", user?.email],
-    queryFn: async () => {
-      if (!user?.email) return { items: [], total: 0 };
-      const res = await fetch(`${baseUrl}/api/medicine/history?userEmail=${encodeURIComponent(user.email)}`);
-      if (!res.ok) throw new Error("Failed to load history");
-      return res.json() as Promise<{ items: ScanHistoryItem[]; total: number }>;
-    },
-    staleTime: 5000,
-    refetchOnWindowFocus: true,
-    enabled: !!user?.email,
-  });
-
-  const recentItems = (data?.items ?? []).slice(0, 3);
+  const { items, isLoading, reload } = useLocalHistory();
+  const recentItems = items.slice(0, 3);
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
-      <DrawerMenu visible={drawerOpen} onClose={() => setDrawerOpen(false)} user={user} />
+      <DrawerMenu visible={drawerOpen} onClose={() => setDrawerOpen(false)} />
 
       <ScrollView
         style={{ flex: 1 }}
@@ -232,11 +169,7 @@ export default function HomeScreen() {
         ]}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl
-            refreshing={isRefetching}
-            onRefresh={refetch}
-            tintColor={colors.primary}
-          />
+          <RefreshControl refreshing={isLoading} onRefresh={reload} tintColor={colors.primary} />
         }
       >
         {/* Header */}
@@ -245,16 +178,14 @@ export default function HomeScreen() {
             <Ionicons name="menu" size={26} color={colors.foreground} />
           </TouchableOpacity>
           <Text style={[styles.appName, { color: colors.primary }]}>Medi Scan AI</Text>
-          <TouchableOpacity style={[styles.avatar, { backgroundColor: colors.surfaceContainer }]}>
-            <Text style={[styles.avatarText, { color: colors.primary }]}>
-              {(user?.firstName?.[0] ?? user?.email?.[0] ?? "U").toUpperCase()}
-            </Text>
-          </TouchableOpacity>
+          <View style={[styles.avatar, { backgroundColor: colors.surfaceContainer }]}>
+            <MaterialCommunityIcons name="shield-plus-outline" size={20} color={colors.primary} />
+          </View>
         </View>
 
         {/* Greeting */}
         <View style={styles.greeting}>
-          <Text style={[styles.greetingTitle, { color: colors.foreground }]}>Hello, {user?.firstName ?? "there"}</Text>
+          <Text style={[styles.greetingTitle, { color: colors.foreground }]}>Welcome Back</Text>
           <Text style={[styles.greetingSubtitle, { color: colors.mutedForeground }]}>
             Stay on top of your health journey today.
           </Text>
@@ -272,22 +203,13 @@ export default function HomeScreen() {
           <Text style={[styles.scanLabel, { color: colors.primary }]}>Scan Medicine</Text>
         </View>
 
-        {/* Recent Activity header */}
+        {/* Recent Activity */}
         <View style={styles.sectionHeader}>
           <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Recent Activity</Text>
           <TouchableOpacity onPress={() => router.push("/history")}>
             <Text style={[styles.viewHistory, { color: colors.primary }]}>View History</Text>
           </TouchableOpacity>
         </View>
-
-        {isLoading && (
-          <View style={styles.loadingRow}>
-            <ActivityIndicator size="small" color={colors.primary} />
-            <Text style={[styles.loadingText, { color: colors.mutedForeground }]}>
-              Loading recent scans...
-            </Text>
-          </View>
-        )}
 
         {!isLoading && recentItems.length === 0 && (
           <View style={[styles.emptyCard, { backgroundColor: colors.surfaceContainerLow, borderColor: colors.outlineVariant }]}>
@@ -298,11 +220,11 @@ export default function HomeScreen() {
           </View>
         )}
 
-        {!isLoading && recentItems.map((scan) => (
+        {recentItems.map((scan: LocalScanItem) => (
           <TouchableOpacity
             key={scan.id}
             style={[styles.card, { backgroundColor: colors.card, borderColor: colors.outlineVariant }]}
-            onPress={() => router.push({ pathname: "/detail", params: { scanId: String(scan.id) } })}
+            onPress={() => router.push({ pathname: "/detail", params: { scanId: scan.id } })}
             activeOpacity={0.75}
           >
             <View style={[styles.pillThumb, { backgroundColor: colors.surfaceContainerLow }]}>
@@ -349,7 +271,6 @@ const styles = StyleSheet.create({
   menuBtn: { padding: 4 },
   appName: { fontSize: 18, fontFamily: "Manrope_700Bold", fontWeight: "700", letterSpacing: -0.3 },
   avatar: { width: 38, height: 38, borderRadius: 19, alignItems: "center", justifyContent: "center" },
-  avatarText: { fontSize: 16, fontFamily: "Manrope_700Bold", fontWeight: "700" },
 
   greeting: { marginBottom: 32 },
   greetingTitle: { fontSize: 32, fontFamily: "Manrope_700Bold", fontWeight: "700", letterSpacing: -0.5, lineHeight: 40 },
@@ -363,8 +284,6 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 18, fontFamily: "Manrope_700Bold", fontWeight: "700" },
   viewHistory: { fontSize: 14, fontFamily: "Inter_400Regular", fontWeight: "600" },
 
-  loadingRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 16 },
-  loadingText: { fontSize: 14, fontFamily: "Inter_400Regular" },
   emptyCard: { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderRadius: 12, borderWidth: 1, marginBottom: 10 },
   emptyText: { fontSize: 14, fontFamily: "Inter_400Regular", flex: 1, lineHeight: 20 },
 
@@ -384,66 +303,17 @@ const styles = StyleSheet.create({
   tabLabel: { fontSize: 11, fontFamily: "Inter_400Regular", fontWeight: "500" },
 
   drawerBackdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.45)" },
-  drawer: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    left: 0,
-    width: DRAWER_WIDTH,
-    shadowColor: "#000",
-    shadowOffset: { width: 4, height: 0 },
-    shadowOpacity: 0.18,
-    shadowRadius: 20,
-    elevation: 16,
-  },
-  drawerHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    marginBottom: 8,
-  },
-  drawerAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-  drawerAvatarText: { fontSize: 18, fontFamily: "Manrope_700Bold", fontWeight: "700" },
-  drawerName: { fontSize: 15, fontFamily: "Manrope_700Bold", fontWeight: "700" },
-  drawerEmail: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 1 },
+  drawer: { position: "absolute", top: 0, bottom: 0, left: 0, width: DRAWER_WIDTH, shadowColor: "#000", shadowOffset: { width: 4, height: 0 }, shadowOpacity: 0.18, shadowRadius: 20, elevation: 16 },
+  drawerHeader: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 20, paddingBottom: 20, borderBottomWidth: StyleSheet.hairlineWidth, marginBottom: 8 },
+  drawerLogoWrap: { width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center", flexShrink: 0 },
+  drawerTitle: { fontSize: 15, fontFamily: "Manrope_700Bold", fontWeight: "700" },
+  drawerSubtitle: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 1 },
   drawerCloseBtn: { padding: 4 },
-
   drawerItems: { paddingHorizontal: 12, flex: 1 },
-  drawerItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    paddingVertical: 16,
-    paddingHorizontal: 8,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  drawerItemIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
+  drawerItem: { flexDirection: "row", alignItems: "center", gap: 14, paddingVertical: 16, paddingHorizontal: 8, borderBottomWidth: StyleSheet.hairlineWidth },
+  drawerItemIcon: { width: 40, height: 40, borderRadius: 10, alignItems: "center", justifyContent: "center", flexShrink: 0 },
   drawerItemLabel: { fontSize: 15, fontFamily: "Manrope_700Bold", fontWeight: "700" },
   drawerItemSub: { fontSize: 12, fontFamily: "Inter_400Regular" },
-
-  drawerFooter: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    paddingTop: 16,
-  },
+  drawerFooter: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingTop: 16 },
   drawerFooterText: { fontSize: 13, fontFamily: "Inter_400Regular" },
 });

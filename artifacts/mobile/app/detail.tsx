@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Platform,
@@ -12,23 +12,9 @@ import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
 import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
-import { useAuth } from "@/lib/auth";
-
-interface ScanHistoryItem {
-  id: number;
-  name: string;
-  dosage: string;
-  primaryUse: string;
-  approximatePrice: string;
-  generalInfo: string;
-  warnings: string;
-  identified: boolean;
-  createdAt: string;
-  imageUrl?: string | null;
-}
+import { getScanById, type LocalScanItem } from "@/hooks/useLocalHistory";
 
 function InfoCard({ icon, label, value, accent, colors }: {
   icon: string; label: string; value: string; accent: string;
@@ -56,25 +42,16 @@ export default function DetailScreen() {
   const topPad = Platform.OS === "web" ? 52 : insets.top;
   const bottomPad = Platform.OS === "web" ? 20 : insets.bottom;
 
-  const baseUrl = `https://${process.env.EXPO_PUBLIC_DOMAIN}`;
+  const [item, setItem] = useState<LocalScanItem | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const { user } = useAuth();
-
-  const { data: item, isLoading, error } = useQuery({
-    queryKey: ["scanDetail", scanId, user?.email],
-    queryFn: async () => {
-      if (!user?.email) return null;
-      const res = await fetch(`${baseUrl}/api/medicine/history?userEmail=${encodeURIComponent(user.email)}`);
-      if (!res.ok) throw new Error("Failed to load");
-      const body = await res.json() as { items: ScanHistoryItem[] };
-      return body.items.find((i) => String(i.id) === scanId) ?? null;
-    },
-    enabled: !!scanId && !!user?.email,
-  });
-
-  const storedImageUri = item?.imageUrl
-    ? `${baseUrl}/api/storage${item.imageUrl}`
-    : null;
+  useEffect(() => {
+    if (!scanId) { setIsLoading(false); return; }
+    getScanById(scanId).then((found) => {
+      setItem(found);
+      setIsLoading(false);
+    });
+  }, [scanId]);
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
@@ -96,34 +73,32 @@ export default function DetailScreen() {
             <ActivityIndicator size="large" color={colors.primary} />
           </View>
         )}
-        {(error || (!isLoading && !item)) && (
+
+        {!isLoading && !item && (
           <View style={styles.center}>
             <MaterialCommunityIcons name="alert-circle-outline" size={48} color={colors.destructive} />
             <Text style={[styles.statusText, { color: colors.mutedForeground }]}>Scan not found</Text>
           </View>
         )}
+
         {item && (
           <>
-            {/* Hero image */}
-            {storedImageUri && (
+            {item.imageUri && (
               <View style={styles.heroWrap}>
-                <Image
-                  source={{ uri: storedImageUri }}
-                  style={styles.heroImage}
-                  contentFit="cover"
-                />
-                <LinearGradient
-                  colors={["transparent", "rgba(0,0,0,0.55)"]}
-                  style={StyleSheet.absoluteFill}
-                />
+                <Image source={{ uri: item.imageUri }} style={styles.heroImage} contentFit="cover" />
+                <LinearGradient colors={["transparent", "rgba(0,0,0,0.55)"]} style={StyleSheet.absoluteFill} />
               </View>
             )}
 
-            <View style={[styles.content, !storedImageUri && { paddingTop: 20 }]}>
+            <View style={[styles.content, !item.imageUri && { paddingTop: 20 }]}>
               <View style={styles.nameRow}>
                 <Text style={[styles.medicineName, { color: colors.foreground }]}>{item.name}</Text>
                 <View style={[styles.badge, { backgroundColor: item.identified ? colors.successContainer : colors.surfaceContainer }]}>
-                  <Ionicons name={item.identified ? "checkmark-circle" : "help-circle"} size={13} color={item.identified ? colors.success : colors.mutedForeground} />
+                  <Ionicons
+                    name={item.identified ? "checkmark-circle" : "help-circle"}
+                    size={13}
+                    color={item.identified ? colors.success : colors.mutedForeground}
+                  />
                   <Text style={[styles.badgeText, { color: item.identified ? colors.success : colors.mutedForeground }]}>
                     {item.identified ? "Identified" : "Uncertain"}
                   </Text>
