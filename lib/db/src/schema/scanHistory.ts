@@ -5,6 +5,7 @@ import { z } from "zod/v4";
 export const scanHistoryTable = pgTable("scan_history", {
   id: serial("id").primaryKey(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  userEmail: text("user_email").notNull().default(""),
   name: text("name").notNull(),
   dosage: text("dosage").notNull(),
   primaryUse: text("primary_use").notNull(),

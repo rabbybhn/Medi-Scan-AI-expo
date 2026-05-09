@@ -76,14 +76,16 @@ export default function HomeScreen() {
   const baseUrl = `https://${process.env.EXPO_PUBLIC_DOMAIN}`;
 
   const { data, isLoading, isRefetching, refetch } = useQuery({
-    queryKey: ["medicineHistory"],
+    queryKey: ["medicineHistory", user?.email],
     queryFn: async () => {
-      const res = await fetch(`${baseUrl}/api/medicine/history`);
+      if (!user?.email) return { items: [], total: 0 };
+      const res = await fetch(`${baseUrl}/api/medicine/history?userEmail=${encodeURIComponent(user.email)}`);
       if (!res.ok) throw new Error("Failed to load history");
       return res.json() as Promise<{ items: ScanHistoryItem[]; total: number }>;
     },
     staleTime: 5000,
     refetchOnWindowFocus: true,
+    enabled: !!user?.email,
   });
 
   const recentItems = (data?.items ?? []).slice(0, 3);

@@ -15,6 +15,7 @@ import { useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ScanHistoryItem {
   id: number;
@@ -112,14 +113,18 @@ export default function HistoryScreen() {
 
   const baseUrl = `https://${process.env.EXPO_PUBLIC_DOMAIN}`;
 
+  const { user } = useAuth();
+
   const { data, isLoading, error, refetch, isRefetching } = useQuery({
-    queryKey: ["medicineHistory"],
+    queryKey: ["medicineHistory", user?.email],
     queryFn: async () => {
-      const res = await fetch(`${baseUrl}/api/medicine/history`);
+      if (!user?.email) return { items: [], total: 0 };
+      const res = await fetch(`${baseUrl}/api/medicine/history?userEmail=${encodeURIComponent(user.email)}`);
       if (!res.ok) throw new Error("Failed to load history");
       return res.json() as Promise<{ items: ScanHistoryItem[]; total: number }>;
     },
     staleTime: 5000,
+    enabled: !!user?.email,
   });
 
   const items = data?.items ?? [];

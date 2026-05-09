@@ -2,7 +2,7 @@ import { Router } from "express";
 import { ai } from "@workspace/integrations-gemini-ai";
 import { db } from "@workspace/db";
 import { scanHistoryTable } from "@workspace/db/schema";
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { ObjectStorageService } from "../lib/objectStorage.js";
 
 const router = Router();
@@ -23,44 +23,34 @@ Respond ONLY with valid JSON — no markdown, no explanation.`;
 
 async function uploadImageToStorage(base64Data: string): Promise<string | null> {
   try {
-    // Get a presigned upload URL
     const uploadUrl = await storage.getObjectEntityUploadURL();
-
-    // Convert base64 to buffer
     const imageBuffer = Buffer.from(base64Data, "base64");
-
-    // Upload directly to GCS via presigned URL
     const uploadResponse = await fetch(uploadUrl, {
       method: "PUT",
       headers: { "Content-Type": "image/jpeg" },
       body: imageBuffer,
     });
-
-    if (!uploadResponse.ok) {
-      return null;
-    }
-
-    // Normalize the GCS URL to a local object path
-    const objectPath = storage.normalizeObjectEntityPath(uploadUrl.split("?")[0] ?? uploadUrl);
-    return objectPath;
+    if (!uploadResponse.ok) return null;
+    return storage.normalizeObjectEntityPath(uploadUrl.split("?")[0] ?? uploadUrl);
   } catch {
     return null;
   }
 }
 
 router.post("/medicine/analyze", async (req, res) => {
-  const { imageBase64 } = req.body as { imageBase64?: string };
+  const { imageBase64, userEmail } = req.body as { imageBase64?: string; userEmail?: string };
 
   if (!imageBase64) {
     res.status(400).json({ error: "imageBase64 is required" });
     return;
   }
 
+  const email = userEmail?.trim() || "anonymous";
+
   const base64Data = imageBase64.startsWith("data:")
     ? (imageBase64.split(",")[1] ?? imageBase64)
     : imageBase64;
 
-  // Run AI analysis and image upload concurrently
   const [aiResponse, imageUrl] = await Promise.all([
     ai.models.generateContent({
       model: "gemini-2.5-flash",
@@ -105,6 +95,7 @@ router.post("/medicine/analyze", async (req, res) => {
   }
 
   const record = {
+    userEmail: email,
     identified: parsed.identified ?? false,
     name: parsed.name ?? "Unknown Medicine",
     dosage: parsed.dosage ?? "Consult a healthcare professional",
@@ -129,10 +120,18 @@ router.post("/medicine/analyze", async (req, res) => {
 });
 
 router.get("/medicine/history", async (req, res) => {
+  const { userEmail } = req.query as { userEmail?: string };
+
+  if (!userEmail?.trim()) {
+    res.status(400).json({ error: "userEmail query parameter is required" });
+    return;
+  }
+
   try {
     const items = await db
       .select()
       .from(scanHistoryTable)
+      .where(eq(scanHistoryTable.userEmail, userEmail.trim()))
       .orderBy(desc(scanHistoryTable.createdAt))
       .limit(100);
 

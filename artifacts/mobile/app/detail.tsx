@@ -15,6 +15,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ScanHistoryItem {
   id: number;
@@ -57,15 +58,18 @@ export default function DetailScreen() {
 
   const baseUrl = `https://${process.env.EXPO_PUBLIC_DOMAIN}`;
 
+  const { user } = useAuth();
+
   const { data: item, isLoading, error } = useQuery({
-    queryKey: ["scanDetail", scanId],
+    queryKey: ["scanDetail", scanId, user?.email],
     queryFn: async () => {
-      const res = await fetch(`${baseUrl}/api/medicine/history`);
+      if (!user?.email) return null;
+      const res = await fetch(`${baseUrl}/api/medicine/history?userEmail=${encodeURIComponent(user.email)}`);
       if (!res.ok) throw new Error("Failed to load");
       const body = await res.json() as { items: ScanHistoryItem[] };
       return body.items.find((i) => String(i.id) === scanId) ?? null;
     },
-    enabled: !!scanId,
+    enabled: !!scanId && !!user?.email,
   });
 
   const storedImageUri = item?.imageUrl
