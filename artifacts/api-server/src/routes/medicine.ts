@@ -3,21 +3,50 @@ import { ai } from "@workspace/integrations-gemini-ai";
 import { db } from "@workspace/db";
 import { scanHistoryTable } from "@workspace/db/schema";
 import { desc } from "drizzle-orm";
+import { ObjectStorageService } from "../lib/objectStorage.js";
 
 const router = Router();
+const storage = new ObjectStorageService();
 
 const SYSTEM_PROMPT = `You are a pharmaceutical expert assistant. When shown an image of medicine (pill, tablet, capsule, bottle, blister pack, or packaging), identify it and provide accurate, helpful information.
 
 Always respond with a JSON object with these exact fields:
 - identified (boolean): whether you could identify the medicine
 - name (string): full medicine name (brand + generic if known), or "Unknown Medicine" if not identified
-- dosage (string): recommended dosage, frequency, and instructions. Include standard adult dosage. If unidentified, provide general guidance.
+- dosage (string): recommended dosage, frequency, and instructions. Include standard adult dosage.
 - primaryUse (string): primary medical indication and what condition(s) it treats
-- approximatePrice (string): approximate retail price range in USD (e.g. "$5-$15 for 30 tablets"). Note if it varies significantly by region.
+- approximatePrice (string): approximate retail price range in USD (e.g. "$5-$15 for 30 tablets").
 - generalInfo (string): brief overview including drug class, mechanism of action, and relevant details
 - warnings (string): key warnings, contraindications, and important side effects to be aware of
 
-Be helpful, accurate, and concise. Respond ONLY with valid JSON — no markdown, no explanation.`;
+Respond ONLY with valid JSON — no markdown, no explanation.`;
+
+async function uploadImageToStorage(base64Data: string): Promise<string | null> {
+  try {
+    // Get a presigned upload URL
+    const uploadUrl = await storage.getObjectEntityUploadURL();
+
+    // Convert base64 to buffer
+    const imageBuffer = Buffer.from(base64Data, "base64");
+
+    // Upload directly to GCS via presigned URL
+    const uploadResponse = await fetch(uploadUrl, {
+      method: "PUT",
+      headers: { "Content-Type": "image/jpeg" },
+      body: imageBuffer,
+    });
+
+    if (!uploadResponse.ok) {
+      return null;
+    }
+
+    // Normalize the GCS URL to a local object path
+    const objectPath = storage.normalizeObjectEntityPath(uploadUrl.split("?")[0] ?? uploadUrl);
+    return objectPath;
+  } catch {
+    return null;
+  }
+}
 
 router.post("/medicine/analyze", async (req, res) => {
   const { imageBase64 } = req.body as { imageBase64?: string };
@@ -31,8 +60,9 @@ router.post("/medicine/analyze", async (req, res) => {
     ? (imageBase64.split(",")[1] ?? imageBase64)
     : imageBase64;
 
-  try {
-    const response = await ai.models.generateContent({
+  // Run AI analysis and image upload concurrently
+  const [aiResponse, imageUrl] = await Promise.all([
+    ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: [
         {
@@ -48,45 +78,53 @@ router.post("/medicine/analyze", async (req, res) => {
         responseMimeType: "application/json",
         maxOutputTokens: 1024,
       },
-    });
+    }).catch((err) => { req.log.error({ err }, "AI analysis failed"); return null; }),
+    uploadImageToStorage(base64Data),
+  ]);
 
-    const text = response.text;
-    if (!text) {
-      res.status(500).json({ error: "No response from AI" });
-      return;
-    }
+  if (!aiResponse?.text) {
+    res.status(500).json({ error: "Failed to analyze medicine" });
+    return;
+  }
 
-    const parsed = JSON.parse(text) as {
-      identified?: boolean;
-      name?: string;
-      dosage?: string;
-      primaryUse?: string;
-      approximatePrice?: string;
-      generalInfo?: string;
-      warnings?: string;
-    };
+  let parsed: {
+    identified?: boolean;
+    name?: string;
+    dosage?: string;
+    primaryUse?: string;
+    approximatePrice?: string;
+    generalInfo?: string;
+    warnings?: string;
+  };
 
-    const record = {
-      identified: parsed.identified ?? false,
-      name: parsed.name ?? "Unknown Medicine",
-      dosage: parsed.dosage ?? "Consult a healthcare professional",
-      primaryUse: parsed.primaryUse ?? "Unable to determine",
-      approximatePrice: parsed.approximatePrice ?? "Price unavailable",
-      generalInfo: parsed.generalInfo ?? "Unable to analyze",
-      warnings: parsed.warnings ?? "Consult a healthcare professional before use",
-    };
+  try {
+    parsed = JSON.parse(aiResponse.text) as typeof parsed;
+  } catch {
+    res.status(500).json({ error: "Failed to parse AI response" });
+    return;
+  }
 
-    // Save to database
+  const record = {
+    identified: parsed.identified ?? false,
+    name: parsed.name ?? "Unknown Medicine",
+    dosage: parsed.dosage ?? "Consult a healthcare professional",
+    primaryUse: parsed.primaryUse ?? "Unable to determine",
+    approximatePrice: parsed.approximatePrice ?? "Price unavailable",
+    generalInfo: parsed.generalInfo ?? "Unable to analyze",
+    warnings: parsed.warnings ?? "Consult a healthcare professional before use",
+    imageUrl: imageUrl ?? null,
+  };
+
+  try {
     const [saved] = await db.insert(scanHistoryTable).values(record).returning();
-
     res.json({
       ...record,
       id: saved?.id ?? 0,
       createdAt: saved?.createdAt ?? new Date(),
     });
   } catch (err) {
-    req.log.error({ err }, "Medicine analysis failed");
-    res.status(500).json({ error: "Failed to analyze medicine" });
+    req.log.error({ err }, "Failed to save scan to DB");
+    res.status(500).json({ error: "Failed to save scan" });
   }
 });
 

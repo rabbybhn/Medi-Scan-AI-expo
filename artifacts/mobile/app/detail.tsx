@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
@@ -24,6 +26,7 @@ interface ScanHistoryItem {
   warnings: string;
   identified: boolean;
   createdAt: string;
+  imageUrl?: string | null;
 }
 
 function InfoCard({ icon, label, value, accent, colors }: {
@@ -65,6 +68,10 @@ export default function DetailScreen() {
     enabled: !!scanId,
   });
 
+  const storedImageUri = item?.imageUrl
+    ? `${baseUrl}/api/storage${item.imageUrl}`
+    : null;
+
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: colors.outlineVariant }]}>
@@ -92,43 +99,60 @@ export default function DetailScreen() {
           </View>
         )}
         {item && (
-          <View style={styles.content}>
-            <View style={styles.nameRow}>
-              <Text style={[styles.medicineName, { color: colors.foreground }]}>{item.name}</Text>
-              <View style={[styles.badge, { backgroundColor: item.identified ? colors.successContainer : colors.surfaceContainer }]}>
-                <Ionicons name={item.identified ? "checkmark-circle" : "help-circle"} size={13} color={item.identified ? colors.success : colors.mutedForeground} />
-                <Text style={[styles.badgeText, { color: item.identified ? colors.success : colors.mutedForeground }]}>
-                  {item.identified ? "Identified" : "Uncertain"}
+          <>
+            {/* Hero image */}
+            {storedImageUri && (
+              <View style={styles.heroWrap}>
+                <Image
+                  source={{ uri: storedImageUri }}
+                  style={styles.heroImage}
+                  contentFit="cover"
+                />
+                <LinearGradient
+                  colors={["transparent", "rgba(0,0,0,0.55)"]}
+                  style={StyleSheet.absoluteFill}
+                />
+              </View>
+            )}
+
+            <View style={[styles.content, !storedImageUri && { paddingTop: 20 }]}>
+              <View style={styles.nameRow}>
+                <Text style={[styles.medicineName, { color: colors.foreground }]}>{item.name}</Text>
+                <View style={[styles.badge, { backgroundColor: item.identified ? colors.successContainer : colors.surfaceContainer }]}>
+                  <Ionicons name={item.identified ? "checkmark-circle" : "help-circle"} size={13} color={item.identified ? colors.success : colors.mutedForeground} />
+                  <Text style={[styles.badgeText, { color: item.identified ? colors.success : colors.mutedForeground }]}>
+                    {item.identified ? "Identified" : "Uncertain"}
+                  </Text>
+                </View>
+              </View>
+              <Text style={[styles.dateText, { color: colors.outline }]}>
+                {new Date(item.createdAt).toLocaleString()}
+              </Text>
+
+              <View style={styles.cards}>
+                <InfoCard icon="medical" label="Primary Use" value={item.primaryUse} accent="#0052cc" colors={colors} />
+                <InfoCard icon="flask-outline" label="Dosage" value={item.dosage} accent="#8b5cf6" colors={colors} />
+                <InfoCard icon="pricetag-outline" label="Approximate Price" value={item.approximatePrice} accent="#10b981" colors={colors} />
+                <InfoCard icon="information-circle-outline" label="General Information" value={item.generalInfo} accent="#06b6d4" colors={colors} />
+                <InfoCard icon="warning-outline" label="Warnings & Side Effects" value={item.warnings} accent="#f59e0b" colors={colors} />
+              </View>
+
+              <View style={[styles.disclaimer, { backgroundColor: colors.muted, borderColor: colors.outlineVariant }]}>
+                <Feather name="alert-triangle" size={13} color={colors.mutedForeground} />
+                <Text style={[styles.disclaimerText, { color: colors.mutedForeground }]}>
+                  For informational purposes only. Always consult a healthcare professional.
                 </Text>
               </View>
-            </View>
-            <Text style={[styles.dateText, { color: colors.outline }]}>
-              {new Date(item.createdAt).toLocaleString()}
-            </Text>
 
-            <View style={styles.cards}>
-              <InfoCard icon="medical" label="Primary Use" value={item.primaryUse} accent="#0052cc" colors={colors} />
-              <InfoCard icon="flask-outline" label="Dosage" value={item.dosage} accent="#8b5cf6" colors={colors} />
-              <InfoCard icon="pricetag-outline" label="Approximate Price" value={item.approximatePrice} accent="#10b981" colors={colors} />
-              <InfoCard icon="information-circle-outline" label="General Information" value={item.generalInfo} accent="#06b6d4" colors={colors} />
-              <InfoCard icon="warning-outline" label="Warnings & Side Effects" value={item.warnings} accent="#f59e0b" colors={colors} />
+              <TouchableOpacity
+                style={[styles.scanAgainBtn, { backgroundColor: colors.primary }]}
+                onPress={() => router.push("/scan")}
+              >
+                <Ionicons name="camera" size={18} color="#fff" />
+                <Text style={styles.scanAgainText}>Scan Another</Text>
+              </TouchableOpacity>
             </View>
-
-            <View style={[styles.disclaimer, { backgroundColor: colors.muted, borderColor: colors.outlineVariant }]}>
-              <Feather name="alert-triangle" size={13} color={colors.mutedForeground} />
-              <Text style={[styles.disclaimerText, { color: colors.mutedForeground }]}>
-                For informational purposes only. Always consult a healthcare professional.
-              </Text>
-            </View>
-
-            <TouchableOpacity
-              style={[styles.scanAgainBtn, { backgroundColor: colors.primary }]}
-              onPress={() => router.push("/scan")}
-            >
-              <Ionicons name="camera" size={18} color="#fff" />
-              <Text style={styles.scanAgainText}>Scan Another</Text>
-            </TouchableOpacity>
-          </View>
+          </>
         )}
       </ScrollView>
     </View>
@@ -140,10 +164,12 @@ const styles = StyleSheet.create({
   header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, paddingBottom: 14, borderBottomWidth: StyleSheet.hairlineWidth },
   backBtn: { width: 40, height: 40, alignItems: "center", justifyContent: "center" },
   headerTitle: { fontSize: 18, fontFamily: "Manrope_700Bold", fontWeight: "700" },
-  scroll: { padding: 20 },
+  scroll: { paddingHorizontal: 0 },
+  heroWrap: { height: 220, overflow: "hidden", backgroundColor: "#000" },
+  heroImage: { width: "100%", height: "100%" },
   center: { alignItems: "center", justifyContent: "center", paddingTop: 80, gap: 12 },
   statusText: { fontSize: 15, fontFamily: "Inter_400Regular", textAlign: "center" },
-  content: { gap: 12 },
+  content: { padding: 20, gap: 12 },
   nameRow: { flexDirection: "row", alignItems: "flex-start", gap: 10, flexWrap: "wrap" },
   medicineName: { fontSize: 24, fontFamily: "Manrope_700Bold", fontWeight: "700", letterSpacing: -0.4, lineHeight: 30, flex: 1 },
   badge: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, marginTop: 4 },

@@ -15,7 +15,6 @@ export interface AnalyzeMedicineRequest {
 }
 
 export interface MedicineAnalysisResult {
-  /** Saved scan record ID */
   id: number;
   name: string;
   dosage: string;
@@ -24,6 +23,7 @@ export interface MedicineAnalysisResult {
   generalInfo: string;
   warnings: string;
   identified: boolean;
+  imageUrl?: string | null;
   createdAt: string;
 }
 
@@ -36,12 +36,24 @@ export interface ScanHistoryItem {
   generalInfo: string;
   warnings: string;
   identified: boolean;
+  imageUrl?: string | null;
   createdAt: string;
 }
 
 export interface ScanHistoryList {
   items: ScanHistoryItem[];
   total: number;
+}
+
+export interface RequestUploadUrlBody {
+  name: string;
+  size: number;
+  contentType: string;
+}
+
+export interface RequestUploadUrlResponse {
+  uploadURL: string;
+  objectPath: string;
 }
 
 export interface ErrorResponse {

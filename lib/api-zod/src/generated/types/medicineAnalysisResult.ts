@@ -7,7 +7,6 @@
  */
 
 export interface MedicineAnalysisResult {
-  /** Saved scan record ID */
   id: number;
   name: string;
   dosage: string;
@@ -16,5 +15,6 @@ export interface MedicineAnalysisResult {
   generalInfo: string;
   warnings: string;
   identified: boolean;
+  imageUrl?: string | null;
   createdAt: Date;
 }

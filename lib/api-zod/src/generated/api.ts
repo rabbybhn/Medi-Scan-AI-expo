@@ -8,7 +8,6 @@
 import * as zod from "zod";
 
 /**
- * Returns server health status
  * @summary Health check
  */
 export const HealthCheckResponse = zod.object({
@@ -16,7 +15,7 @@ export const HealthCheckResponse = zod.object({
 });
 
 /**
- * Analyzes a medicine image using AI and returns dosage, use, price, and general information. Also saves the scan to history.
+ * Analyzes a medicine image using AI, uploads the image to object storage, and saves the scan to history.
  * @summary Analyze medicine from image
  */
 export const AnalyzeMedicineBody = zod.object({
@@ -24,7 +23,7 @@ export const AnalyzeMedicineBody = zod.object({
 });
 
 export const AnalyzeMedicineResponse = zod.object({
-  id: zod.number().describe("Saved scan record ID"),
+  id: zod.number(),
   name: zod.string(),
   dosage: zod.string(),
   primaryUse: zod.string(),
@@ -32,6 +31,7 @@ export const AnalyzeMedicineResponse = zod.object({
   generalInfo: zod.string(),
   warnings: zod.string(),
   identified: zod.boolean(),
+  imageUrl: zod.string().nullish(),
   createdAt: zod.coerce.date(),
 });
 
@@ -50,8 +50,30 @@ export const GetMedicineHistoryResponse = zod.object({
       generalInfo: zod.string(),
       warnings: zod.string(),
       identified: zod.boolean(),
+      imageUrl: zod.string().nullish(),
       createdAt: zod.coerce.date(),
     }),
   ),
   total: zod.number(),
+});
+
+/**
+ * @summary Request a presigned upload URL
+ */
+export const RequestUploadUrlBody = zod.object({
+  name: zod.string(),
+  size: zod.number(),
+  contentType: zod.string(),
+});
+
+export const RequestUploadUrlResponse = zod.object({
+  uploadURL: zod.string(),
+  objectPath: zod.string(),
+});
+
+/**
+ * @summary Serve a stored object
+ */
+export const GetStorageObjectParams = zod.object({
+  objectPath: zod.coerce.string(),
 });

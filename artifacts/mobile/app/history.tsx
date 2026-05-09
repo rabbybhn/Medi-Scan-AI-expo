@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { Image } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
@@ -25,6 +26,7 @@ interface ScanHistoryItem {
   warnings: string;
   identified: boolean;
   createdAt: string;
+  imageUrl?: string | null;
 }
 
 function timeAgo(dateStr: string): string {
@@ -41,19 +43,33 @@ function timeAgo(dateStr: string): string {
 function HistoryCard({
   item,
   onPress,
+  baseUrl,
 }: {
   item: ScanHistoryItem;
   onPress: () => void;
+  baseUrl: string;
 }) {
   const colors = useColors();
+  const imageSource = item.imageUrl
+    ? { uri: `${baseUrl}/api/storage${item.imageUrl}` }
+    : null;
+
   return (
     <TouchableOpacity
       style={[styles.card, { backgroundColor: colors.card, borderColor: colors.outlineVariant }]}
       onPress={onPress}
       activeOpacity={0.75}
     >
-      <View style={[styles.cardIcon, { backgroundColor: colors.surfaceContainerLow }]}>
-        <MaterialCommunityIcons name="pill" size={26} color={colors.primary} />
+      <View style={[styles.cardThumb, { backgroundColor: colors.surfaceContainerLow }]}>
+        {imageSource ? (
+          <Image
+            source={imageSource}
+            style={styles.thumbImage}
+            contentFit="cover"
+          />
+        ) : (
+          <MaterialCommunityIcons name="pill" size={26} color={colors.primary} />
+        )}
       </View>
       <View style={styles.cardBody}>
         <View style={styles.cardTopRow}>
@@ -110,7 +126,6 @@ export default function HistoryScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
-      {/* Header */}
       <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: colors.outlineVariant }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="chevron-back" size={24} color={colors.foreground} />
@@ -181,6 +196,7 @@ export default function HistoryScreen() {
               <HistoryCard
                 key={item.id}
                 item={item}
+                baseUrl={baseUrl}
                 onPress={() =>
                   router.push({
                     pathname: "/detail",
@@ -229,14 +245,16 @@ const styles = StyleSheet.create({
     gap: 12,
     alignItems: "flex-start",
   },
-  cardIcon: {
+  cardThumb: {
     width: 52,
     height: 52,
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
+    overflow: "hidden",
   },
+  thumbImage: { width: "100%", height: "100%" },
   cardBody: { flex: 1, gap: 4 },
   cardTopRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   chip: { paddingHorizontal: 9, paddingVertical: 3, borderRadius: 999 },

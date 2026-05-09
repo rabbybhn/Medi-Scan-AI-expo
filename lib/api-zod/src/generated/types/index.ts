@@ -10,5 +10,7 @@ export * from "./analyzeMedicineRequest";
 export * from "./errorResponse";
 export * from "./healthStatus";
 export * from "./medicineAnalysisResult";
+export * from "./requestUploadUrlBody";
+export * from "./requestUploadUrlResponse";
 export * from "./scanHistoryItem";
 export * from "./scanHistoryList";

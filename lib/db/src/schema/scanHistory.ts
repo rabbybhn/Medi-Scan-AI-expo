@@ -12,6 +12,7 @@ export const scanHistoryTable = pgTable("scan_history", {
   generalInfo: text("general_info").notNull(),
   warnings: text("warnings").notNull(),
   identified: boolean("identified").default(false).notNull(),
+  imageUrl: text("image_url"),
 });
 
 export const insertScanHistorySchema = createInsertSchema(scanHistoryTable).omit({

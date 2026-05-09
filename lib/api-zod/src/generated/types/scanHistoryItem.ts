@@ -15,5 +15,6 @@ export interface ScanHistoryItem {
   generalInfo: string;
   warnings: string;
   identified: boolean;
+  imageUrl?: string | null;
   createdAt: Date;
 }

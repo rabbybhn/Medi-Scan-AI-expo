@@ -12,13 +12,14 @@ tags:
     description: Health operations
   - name: medicine
     description: Medicine scanning and analysis
+  - name: storage
+    description: Object storage operations
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -31,7 +32,7 @@ paths:
       operationId: analyzeMedicine
       tags: [medicine]
       summary: Analyze medicine from image
-      description: Analyzes a medicine image using AI and returns dosage, use, price, and general information. Also saves the scan to history.
+      description: Analyzes a medicine image using AI, uploads the image to object storage, and saves the scan to history.
       requestBody:
         required: true
         content:
@@ -76,6 +77,55 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /storage/uploads/request-url:
+    post:
+      operationId: requestUploadUrl
+      tags: [storage]
+      summary: Request a presigned upload URL
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestUploadUrlBody"
+      responses:
+        "200":
+          description: Presigned upload URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RequestUploadUrlResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /storage/objects/{objectPath}:
+    get:
+      operationId: getStorageObject
+      tags: [storage]
+      summary: Serve a stored object
+      parameters:
+        - in: path
+          name: objectPath
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Object content
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     HealthStatus:
@@ -98,7 +148,6 @@ components:
       properties:
         id:
           type: integer
-          description: Saved scan record ID
         name:
           type: string
         dosage:
@@ -113,6 +162,9 @@ components:
           type: string
         identified:
           type: boolean
+        imageUrl:
+          type: string
+          nullable: true
         createdAt:
           type: string
           format: date-time
@@ -145,6 +197,9 @@ components:
           type: string
         identified:
           type: boolean
+        imageUrl:
+          type: string
+          nullable: true
         createdAt:
           type: string
           format: date-time
@@ -170,6 +225,29 @@ components:
       required:
         - items
         - total
+    RequestUploadUrlBody:
+      type: object
+      properties:
+        name:
+          type: string
+        size:
+          type: integer
+        contentType:
+          type: string
+      required:
+        - name
+        - size
+        - contentType
+    RequestUploadUrlResponse:
+      type: object
+      properties:
+        uploadURL:
+          type: string
+        objectPath:
+          type: string
+      required:
+        - uploadURL
+        - objectPath
     ErrorResponse:
       type: object
       properties:
