@@ -17,7 +17,7 @@ import { useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/lib/auth";
 
 const DRAWER_WIDTH = 300;
 
@@ -139,12 +139,12 @@ function DrawerMenu({
         <View style={[styles.drawerHeader, { borderBottomColor: colors.outlineVariant }]}>
           <View style={[styles.drawerAvatar, { backgroundColor: "#e6edff" }]}>
             <Text style={[styles.drawerAvatarText, { color: "#003d9b" }]}>
-              {user?.avatar ?? "U"}
+              {(user?.firstName?.[0] ?? user?.email?.[0] ?? "U").toUpperCase()}
             </Text>
           </View>
           <View style={{ flex: 1 }}>
             <Text style={[styles.drawerName, { color: colors.foreground }]}>
-              {user?.name ?? "Guest"}
+              {user?.firstName ? `${user.firstName} ${user.lastName ?? ""}`.trim() : "Guest"}
             </Text>
             <Text style={[styles.drawerEmail, { color: colors.mutedForeground }]} numberOfLines={1}>
               {user?.email ?? ""}
@@ -246,13 +246,15 @@ export default function HomeScreen() {
           </TouchableOpacity>
           <Text style={[styles.appName, { color: colors.primary }]}>Medi Scan AI</Text>
           <TouchableOpacity style={[styles.avatar, { backgroundColor: colors.surfaceContainer }]}>
-            <Text style={[styles.avatarText, { color: colors.primary }]}>{user?.avatar ?? "U"}</Text>
+            <Text style={[styles.avatarText, { color: colors.primary }]}>
+              {(user?.firstName?.[0] ?? user?.email?.[0] ?? "U").toUpperCase()}
+            </Text>
           </TouchableOpacity>
         </View>
 
         {/* Greeting */}
         <View style={styles.greeting}>
-          <Text style={[styles.greetingTitle, { color: colors.foreground }]}>Hello, {user?.name ?? "there"}</Text>
+          <Text style={[styles.greetingTitle, { color: colors.foreground }]}>Hello, {user?.firstName ?? "there"}</Text>
           <Text style={[styles.greetingSubtitle, { color: colors.mutedForeground }]}>
             Stay on top of your health journey today.
           </Text>

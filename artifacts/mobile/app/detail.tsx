@@ -15,7 +15,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/lib/auth";
 
 interface ScanHistoryItem {
   id: number;

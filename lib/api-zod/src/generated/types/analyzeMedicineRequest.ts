@@ -9,4 +9,6 @@
 export interface AnalyzeMedicineRequest {
   /** Base64-encoded image of the medicine */
   imageBase64: string;
+  /** User email for history tracking (fallback if not authenticated) */
+  userEmail?: string;
 }
