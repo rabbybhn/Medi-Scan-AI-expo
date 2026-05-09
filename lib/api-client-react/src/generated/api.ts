@@ -5,18 +5,26 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
+  MutationFunction,
   QueryFunction,
   QueryKey,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import type { HealthStatus } from "./api.schemas";
+import type {
+  AnalyzeMedicineRequest,
+  ErrorResponse,
+  HealthStatus,
+  MedicineAnalysisResult,
+} from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
-import type { ErrorType } from "../custom-fetch";
+import type { ErrorType, BodyType } from "../custom-fetch";
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
@@ -99,3 +107,90 @@ export function useHealthCheck<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * Analyzes a medicine image using AI and returns dosage, use, price, and general information
+ * @summary Analyze medicine from image
+ */
+export const getAnalyzeMedicineUrl = () => {
+  return `/api/medicine/analyze`;
+};
+
+export const analyzeMedicine = async (
+  analyzeMedicineRequest: AnalyzeMedicineRequest,
+  options?: RequestInit,
+): Promise<MedicineAnalysisResult> => {
+  return customFetch<MedicineAnalysisResult>(getAnalyzeMedicineUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(analyzeMedicineRequest),
+  });
+};
+
+export const getAnalyzeMedicineMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof analyzeMedicine>>,
+    TError,
+    { data: BodyType<AnalyzeMedicineRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof analyzeMedicine>>,
+  TError,
+  { data: BodyType<AnalyzeMedicineRequest> },
+  TContext
+> => {
+  const mutationKey = ["analyzeMedicine"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof analyzeMedicine>>,
+    { data: BodyType<AnalyzeMedicineRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return analyzeMedicine(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AnalyzeMedicineMutationResult = NonNullable<
+  Awaited<ReturnType<typeof analyzeMedicine>>
+>;
+export type AnalyzeMedicineMutationBody = BodyType<AnalyzeMedicineRequest>;
+export type AnalyzeMedicineMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Analyze medicine from image
+ */
+export const useAnalyzeMedicine = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof analyzeMedicine>>,
+    TError,
+    { data: BodyType<AnalyzeMedicineRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof analyzeMedicine>>,
+  TError,
+  { data: BodyType<AnalyzeMedicineRequest> },
+  TContext
+> => {
+  return useMutation(getAnalyzeMedicineMutationOptions(options));
+};

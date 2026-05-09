@@ -5,14 +5,6 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-export interface HealthStatus {
-  status: string;
-}
-
-export interface AnalyzeMedicineRequest {
-  /** Base64-encoded image of the medicine */
-  imageBase64: string;
-}
 
 export interface MedicineAnalysisResult {
   /** Name of the medicine */
@@ -29,8 +21,4 @@ export interface MedicineAnalysisResult {
   warnings: string;
   /** Whether the medicine was successfully identified */
   identified: boolean;
-}
-
-export interface ErrorResponse {
-  error: string;
 }

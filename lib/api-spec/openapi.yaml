@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: medicine
+    description: Medicine scanning and analysis
 paths:
   /healthz:
     get:
@@ -24,6 +26,37 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /medicine/analyze:
+    post:
+      operationId: analyzeMedicine
+      tags: [medicine]
+      summary: Analyze medicine from image
+      description: Analyzes a medicine image using AI and returns dosage, use, price, and general information
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnalyzeMedicineRequest"
+      responses:
+        "200":
+          description: Medicine analysis result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MedicineAnalysisResult"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +66,50 @@ components:
           type: string
       required:
         - status
-
+    AnalyzeMedicineRequest:
+      type: object
+      properties:
+        imageBase64:
+          type: string
+          description: Base64-encoded image of the medicine
+      required:
+        - imageBase64
+    MedicineAnalysisResult:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the medicine
+        dosage:
+          type: string
+          description: Recommended dosage information
+        primaryUse:
+          type: string
+          description: Primary reason for use / medical purpose
+        approximatePrice:
+          type: string
+          description: Approximate retail price range
+        generalInfo:
+          type: string
+          description: General information about the medicine
+        warnings:
+          type: string
+          description: Important warnings or side effects
+        identified:
+          type: boolean
+          description: Whether the medicine was successfully identified
+      required:
+        - name
+        - dosage
+        - primaryUse
+        - approximatePrice
+        - generalInfo
+        - warnings
+        - identified
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error

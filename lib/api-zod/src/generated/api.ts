@@ -14,3 +14,25 @@ import * as zod from "zod";
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
+
+/**
+ * Analyzes a medicine image using AI and returns dosage, use, price, and general information
+ * @summary Analyze medicine from image
+ */
+export const AnalyzeMedicineBody = zod.object({
+  imageBase64: zod.string().describe("Base64-encoded image of the medicine"),
+});
+
+export const AnalyzeMedicineResponse = zod.object({
+  name: zod.string().describe("Name of the medicine"),
+  dosage: zod.string().describe("Recommended dosage information"),
+  primaryUse: zod
+    .string()
+    .describe("Primary reason for use \/ medical purpose"),
+  approximatePrice: zod.string().describe("Approximate retail price range"),
+  generalInfo: zod.string().describe("General information about the medicine"),
+  warnings: zod.string().describe("Important warnings or side effects"),
+  identified: zod
+    .boolean()
+    .describe("Whether the medicine was successfully identified"),
+});
