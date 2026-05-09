@@ -31,7 +31,7 @@ paths:
       operationId: analyzeMedicine
       tags: [medicine]
       summary: Analyze medicine from image
-      description: Analyzes a medicine image using AI and returns dosage, use, price, and general information
+      description: Analyzes a medicine image using AI and returns dosage, use, price, and general information. Also saves the scan to history.
       requestBody:
         required: true
         content:
@@ -51,6 +51,25 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /medicine/history:
+    get:
+      operationId: getMedicineHistory
+      tags: [medicine]
+      summary: Get scan history
+      description: Returns all previously scanned medicines in reverse chronological order
+      responses:
+        "200":
+          description: List of scan history items
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanHistoryList"
         "500":
           description: Internal server error
           content:
@@ -77,28 +96,28 @@ components:
     MedicineAnalysisResult:
       type: object
       properties:
+        id:
+          type: integer
+          description: Saved scan record ID
         name:
           type: string
-          description: Name of the medicine
         dosage:
           type: string
-          description: Recommended dosage information
         primaryUse:
           type: string
-          description: Primary reason for use / medical purpose
         approximatePrice:
           type: string
-          description: Approximate retail price range
         generalInfo:
           type: string
-          description: General information about the medicine
         warnings:
           type: string
-          description: Important warnings or side effects
         identified:
           type: boolean
-          description: Whether the medicine was successfully identified
+        createdAt:
+          type: string
+          format: date-time
       required:
+        - id
         - name
         - dosage
         - primaryUse
@@ -106,6 +125,51 @@ components:
         - generalInfo
         - warnings
         - identified
+        - createdAt
+    ScanHistoryItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        dosage:
+          type: string
+        primaryUse:
+          type: string
+        approximatePrice:
+          type: string
+        generalInfo:
+          type: string
+        warnings:
+          type: string
+        identified:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - dosage
+        - primaryUse
+        - approximatePrice
+        - generalInfo
+        - warnings
+        - identified
+        - createdAt
+    ScanHistoryList:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ScanHistoryItem"
+        total:
+          type: integer
+      required:
+        - items
+        - total
     ErrorResponse:
       type: object
       properties:

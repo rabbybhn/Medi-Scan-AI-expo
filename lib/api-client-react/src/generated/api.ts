@@ -21,6 +21,7 @@ import type {
   ErrorResponse,
   HealthStatus,
   MedicineAnalysisResult,
+  ScanHistoryList,
 } from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
@@ -109,7 +110,7 @@ export function useHealthCheck<
 }
 
 /**
- * Analyzes a medicine image using AI and returns dosage, use, price, and general information
+ * Analyzes a medicine image using AI and returns dosage, use, price, and general information. Also saves the scan to history.
  * @summary Analyze medicine from image
  */
 export const getAnalyzeMedicineUrl = () => {
@@ -194,3 +195,79 @@ export const useAnalyzeMedicine = <
 > => {
   return useMutation(getAnalyzeMedicineMutationOptions(options));
 };
+
+/**
+ * Returns all previously scanned medicines in reverse chronological order
+ * @summary Get scan history
+ */
+export const getGetMedicineHistoryUrl = () => {
+  return `/api/medicine/history`;
+};
+
+export const getMedicineHistory = async (
+  options?: RequestInit,
+): Promise<ScanHistoryList> => {
+  return customFetch<ScanHistoryList>(getGetMedicineHistoryUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetMedicineHistoryQueryKey = () => {
+  return [`/api/medicine/history`] as const;
+};
+
+export const getGetMedicineHistoryQueryOptions = <
+  TData = Awaited<ReturnType<typeof getMedicineHistory>>,
+  TError = ErrorType<ErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getMedicineHistory>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetMedicineHistoryQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getMedicineHistory>>
+  > = ({ signal }) => getMedicineHistory({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getMedicineHistory>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetMedicineHistoryQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getMedicineHistory>>
+>;
+export type GetMedicineHistoryQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Get scan history
+ */
+
+export function useGetMedicineHistory<
+  TData = Awaited<ReturnType<typeof getMedicineHistory>>,
+  TError = ErrorType<ErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getMedicineHistory>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetMedicineHistoryQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}

@@ -6,8 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface MedicineAnalysisResult {
-  /** Saved scan record ID */
+export interface ScanHistoryItem {
   id: number;
   name: string;
   dosage: string;

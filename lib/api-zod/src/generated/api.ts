@@ -16,7 +16,7 @@ export const HealthCheckResponse = zod.object({
 });
 
 /**
- * Analyzes a medicine image using AI and returns dosage, use, price, and general information
+ * Analyzes a medicine image using AI and returns dosage, use, price, and general information. Also saves the scan to history.
  * @summary Analyze medicine from image
  */
 export const AnalyzeMedicineBody = zod.object({
@@ -24,15 +24,34 @@ export const AnalyzeMedicineBody = zod.object({
 });
 
 export const AnalyzeMedicineResponse = zod.object({
-  name: zod.string().describe("Name of the medicine"),
-  dosage: zod.string().describe("Recommended dosage information"),
-  primaryUse: zod
-    .string()
-    .describe("Primary reason for use \/ medical purpose"),
-  approximatePrice: zod.string().describe("Approximate retail price range"),
-  generalInfo: zod.string().describe("General information about the medicine"),
-  warnings: zod.string().describe("Important warnings or side effects"),
-  identified: zod
-    .boolean()
-    .describe("Whether the medicine was successfully identified"),
+  id: zod.number().describe("Saved scan record ID"),
+  name: zod.string(),
+  dosage: zod.string(),
+  primaryUse: zod.string(),
+  approximatePrice: zod.string(),
+  generalInfo: zod.string(),
+  warnings: zod.string(),
+  identified: zod.boolean(),
+  createdAt: zod.coerce.date(),
+});
+
+/**
+ * Returns all previously scanned medicines in reverse chronological order
+ * @summary Get scan history
+ */
+export const GetMedicineHistoryResponse = zod.object({
+  items: zod.array(
+    zod.object({
+      id: zod.number(),
+      name: zod.string(),
+      dosage: zod.string(),
+      primaryUse: zod.string(),
+      approximatePrice: zod.string(),
+      generalInfo: zod.string(),
+      warnings: zod.string(),
+      identified: zod.boolean(),
+      createdAt: zod.coerce.date(),
+    }),
+  ),
+  total: zod.number(),
 });

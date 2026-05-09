@@ -15,20 +15,33 @@ export interface AnalyzeMedicineRequest {
 }
 
 export interface MedicineAnalysisResult {
-  /** Name of the medicine */
+  /** Saved scan record ID */
+  id: number;
   name: string;
-  /** Recommended dosage information */
   dosage: string;
-  /** Primary reason for use / medical purpose */
   primaryUse: string;
-  /** Approximate retail price range */
   approximatePrice: string;
-  /** General information about the medicine */
   generalInfo: string;
-  /** Important warnings or side effects */
   warnings: string;
-  /** Whether the medicine was successfully identified */
   identified: boolean;
+  createdAt: string;
+}
+
+export interface ScanHistoryItem {
+  id: number;
+  name: string;
+  dosage: string;
+  primaryUse: string;
+  approximatePrice: string;
+  generalInfo: string;
+  warnings: string;
+  identified: boolean;
+  createdAt: string;
+}
+
+export interface ScanHistoryList {
+  items: ScanHistoryItem[];
+  total: number;
 }
 
 export interface ErrorResponse {

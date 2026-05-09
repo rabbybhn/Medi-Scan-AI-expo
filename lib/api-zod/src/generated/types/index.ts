@@ -10,3 +10,5 @@ export * from "./analyzeMedicineRequest";
 export * from "./errorResponse";
 export * from "./healthStatus";
 export * from "./medicineAnalysisResult";
+export * from "./scanHistoryItem";
+export * from "./scanHistoryList";

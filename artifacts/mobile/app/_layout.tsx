@@ -35,6 +35,8 @@ function RootLayoutNav() {
       <Stack.Screen name="index" />
       <Stack.Screen name="scan" options={{ presentation: "fullScreenModal" }} />
       <Stack.Screen name="result" options={{ presentation: "card" }} />
+      <Stack.Screen name="history" options={{ presentation: "card" }} />
+      <Stack.Screen name="detail" options={{ presentation: "card" }} />
     </Stack>
   );
 }
