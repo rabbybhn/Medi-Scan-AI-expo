@@ -12,7 +12,7 @@ import {
 } from "@expo-google-fonts/manrope";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { setBaseUrl } from "@workspace/api-client-react";
-import { Stack } from "expo-router";
+import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -20,6 +20,7 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { useAuth } from "@/hooks/useAuth";
 
 if (process.env.EXPO_PUBLIC_DOMAIN) {
   setBaseUrl(`https://${process.env.EXPO_PUBLIC_DOMAIN}`);
@@ -29,15 +30,36 @@ SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
 
+function AuthGate({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
+  const segments = useSegments();
+
+  useEffect(() => {
+    if (isLoading) return;
+    const inAuthScreen = segments[0] === "login";
+    if (!isAuthenticated && !inAuthScreen) {
+      router.replace("/login");
+    } else if (isAuthenticated && inAuthScreen) {
+      router.replace("/");
+    }
+  }, [isAuthenticated, isLoading, segments]);
+
+  return <>{children}</>;
+}
+
 function RootLayoutNav() {
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
-      <Stack.Screen name="scan" options={{ presentation: "fullScreenModal" }} />
-      <Stack.Screen name="result" options={{ presentation: "card" }} />
-      <Stack.Screen name="history" options={{ presentation: "card" }} />
-      <Stack.Screen name="detail" options={{ presentation: "card" }} />
-    </Stack>
+    <AuthGate>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="login" options={{ presentation: "card" }} />
+        <Stack.Screen name="index" />
+        <Stack.Screen name="scan" options={{ presentation: "fullScreenModal" }} />
+        <Stack.Screen name="result" options={{ presentation: "card" }} />
+        <Stack.Screen name="history" options={{ presentation: "card" }} />
+        <Stack.Screen name="detail" options={{ presentation: "card" }} />
+      </Stack>
+    </AuthGate>
   );
 }
 

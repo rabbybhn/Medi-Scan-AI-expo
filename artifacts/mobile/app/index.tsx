@@ -15,6 +15,7 @@ import { useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ScanHistoryItem {
   id: number;
@@ -67,6 +68,7 @@ export default function HomeScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { user } = useAuth();
 
   const topPad = Platform.OS === "web" ? 52 : insets.top;
   const bottomPad = Platform.OS === "web" ? 20 : insets.bottom;
@@ -110,13 +112,13 @@ export default function HomeScreen() {
           </TouchableOpacity>
           <Text style={[styles.appName, { color: colors.primary }]}>Medi Scan AI</Text>
           <TouchableOpacity style={[styles.avatar, { backgroundColor: colors.surfaceContainer }]}>
-            <Text style={[styles.avatarText, { color: colors.primary }]}>A</Text>
+            <Text style={[styles.avatarText, { color: colors.primary }]}>{user?.avatar ?? "U"}</Text>
           </TouchableOpacity>
         </View>
 
         {/* Greeting */}
         <View style={styles.greeting}>
-          <Text style={[styles.greetingTitle, { color: colors.foreground }]}>Hello, Alex</Text>
+          <Text style={[styles.greetingTitle, { color: colors.foreground }]}>Hello, {user?.name ?? "there"}</Text>
           <Text style={[styles.greetingSubtitle, { color: colors.mutedForeground }]}>
             Stay on top of your health journey today.
           </Text>
@@ -200,46 +202,6 @@ export default function HomeScreen() {
           </TouchableOpacity>
         ))}
 
-        {/* Monthly Adherence card */}
-        <View style={[styles.card, styles.cardRow2, { backgroundColor: colors.card, borderColor: colors.outlineVariant }]}>
-          <View style={[styles.iconCircle, { backgroundColor: colors.surfaceContainerLow }]}>
-            <Ionicons name="calendar-outline" size={22} color={colors.primary} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.cardTitle, { color: colors.foreground }]}>Monthly Adherence</Text>
-            <Text style={[styles.cardSub, { color: colors.mutedForeground }]}>
-              You've missed only 1 dose this week.
-            </Text>
-          </View>
-          <Text style={[styles.adherencePct, { color: colors.primary }]}>92%</Text>
-        </View>
-
-        {/* Next Reminder card */}
-        <View style={[styles.card, styles.cardRow2, { backgroundColor: colors.card, borderColor: colors.outlineVariant }]}>
-          <View style={[styles.iconCircle, { backgroundColor: colors.surfaceContainerLow }]}>
-            <Ionicons name="alarm-outline" size={22} color={colors.primary} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.reminderTime, { color: colors.foreground }]}>8:00 PM</Text>
-            <Text style={[styles.reminderLabel, { color: colors.mutedForeground }]}>Next Reminder</Text>
-            <Text style={[styles.cardSub, { color: colors.mutedForeground }]}>Vitamin D3 Supplement</Text>
-          </View>
-        </View>
-
-        {/* AI Health Insight */}
-        <View style={[styles.insightCard, { backgroundColor: colors.accent }]}>
-          <View style={styles.insightHeader}>
-            <MaterialCommunityIcons name="shimmer" size={18} color="#b2c5ff" />
-            <Text style={styles.insightTag}>AI HEALTH INSIGHT</Text>
-          </View>
-          <Text style={styles.insightBody}>
-            Based on your recent scans, we've noticed an increase in anti-inflammatory use.
-            Consider consulting your health profile for alternative relief options.
-          </Text>
-          <TouchableOpacity style={styles.insightBtn}>
-            <Text style={[styles.insightBtnText, { color: colors.accent }]}>Explore Insights</Text>
-          </TouchableOpacity>
-        </View>
       </ScrollView>
 
       {/* Bottom tab bar */}
@@ -282,7 +244,6 @@ const styles = StyleSheet.create({
   emptyCard: { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderRadius: 12, borderWidth: 1, marginBottom: 10 },
   emptyText: { fontSize: 14, fontFamily: "Inter_400Regular", flex: 1, lineHeight: 20 },
   card: { borderRadius: 14, borderWidth: 1, padding: 14, flexDirection: "row", alignItems: "flex-start", gap: 12, marginBottom: 10 },
-  cardRow2: { alignItems: "center" },
   cardBody: { flex: 1, gap: 4 },
   cardRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   cardTitle: { fontSize: 15, fontFamily: "Manrope_700Bold", fontWeight: "700", lineHeight: 22 },
@@ -291,16 +252,6 @@ const styles = StyleSheet.create({
   pillThumb: { width: 52, height: 52, borderRadius: 10, alignItems: "center", justifyContent: "center", flexShrink: 0 },
   chip: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 999 },
   chipText: { fontSize: 12, fontFamily: "Inter_400Regular", fontWeight: "600" },
-  iconCircle: { width: 44, height: 44, borderRadius: 10, alignItems: "center", justifyContent: "center", flexShrink: 0 },
-  adherencePct: { fontSize: 22, fontFamily: "Manrope_700Bold", fontWeight: "700", letterSpacing: -0.5 },
-  reminderTime: { fontSize: 20, fontFamily: "Manrope_700Bold", fontWeight: "700", lineHeight: 26 },
-  reminderLabel: { fontSize: 12, fontFamily: "Inter_400Regular", marginBottom: 1 },
-  insightCard: { borderRadius: 14, padding: 20, gap: 12, marginBottom: 8 },
-  insightHeader: { flexDirection: "row", alignItems: "center", gap: 6 },
-  insightTag: { fontSize: 11, fontFamily: "Inter_400Regular", fontWeight: "600", color: "#b2c5ff", letterSpacing: 1.2 },
-  insightBody: { fontSize: 14, fontFamily: "Inter_400Regular", color: "#dae2ff", lineHeight: 21 },
-  insightBtn: { alignSelf: "flex-start", backgroundColor: "#ffffff", paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8 },
-  insightBtnText: { fontSize: 14, fontFamily: "Manrope_700Bold", fontWeight: "700" },
   tabBar: { position: "absolute", bottom: 0, left: 0, right: 0, flexDirection: "row", paddingTop: 12, paddingHorizontal: 8, borderTopWidth: StyleSheet.hairlineWidth },
   tabItem: { flex: 1, alignItems: "center", gap: 4 },
   tabIconWrap: { width: 44, height: 30, borderRadius: 15, alignItems: "center", justifyContent: "center" },
