@@ -135,6 +135,7 @@ export default function RootLayout() {
                   <Stack.Screen name="history" options={{ presentation: "card" }} />
                   <Stack.Screen name="detail" options={{ presentation: "card" }} />
                   <Stack.Screen name="profile" options={{ presentation: "card" }} />
+                  <Stack.Screen name="vault" options={{ presentation: "card" }} />
                 </Stack>
 
                 {showSplash && (

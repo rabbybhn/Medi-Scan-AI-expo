@@ -250,7 +250,7 @@ export default function HomeScreen() {
       >
         <BottomTab icon="home" label="Home" active />
         <BottomTab icon="time-outline" label="History" active={false} onPress={() => router.push("/history")} />
-        <BottomTab icon="shield-checkmark-outline" label="Vault" active={false} />
+        <BottomTab icon="shield-checkmark-outline" label="Vault" active={false} onPress={() => router.push("/vault")} />
         <BottomTab icon="person-outline" label="Profile" active={false} onPress={() => router.push("/profile")} />
       </View>
     </View>

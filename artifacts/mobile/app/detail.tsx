@@ -15,6 +15,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
 import { getScanById, type LocalScanItem } from "@/hooks/useLocalHistory";
+import { isInVault, addToVault, removeFromVault } from "@/hooks/useVault";
 
 function InfoCard({ icon, label, value, accent, colors }: {
   icon: string; label: string; value: string; accent: string;
@@ -44,6 +45,8 @@ export default function DetailScreen() {
 
   const [item, setItem] = useState<LocalScanItem | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [inVault, setInVault] = useState(false);
+  const [vaultLoading, setVaultLoading] = useState(false);
 
   useEffect(() => {
     if (!scanId) { setIsLoading(false); return; }
@@ -51,7 +54,21 @@ export default function DetailScreen() {
       setItem(found);
       setIsLoading(false);
     });
+    isInVault(scanId).then(setInVault);
   }, [scanId]);
+
+  async function toggleVault() {
+    if (!scanId || vaultLoading) return;
+    setVaultLoading(true);
+    if (inVault) {
+      await removeFromVault(scanId);
+      setInVault(false);
+    } else {
+      await addToVault(scanId);
+      setInVault(true);
+    }
+    setVaultLoading(false);
+  }
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
@@ -60,7 +77,13 @@ export default function DetailScreen() {
           <Ionicons name="chevron-back" size={24} color={colors.foreground} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.foreground }]}>Scan Detail</Text>
-        <View style={{ width: 40 }} />
+        <TouchableOpacity onPress={toggleVault} style={styles.backBtn} disabled={vaultLoading}>
+          <Ionicons
+            name={inVault ? "bookmark" : "bookmark-outline"}
+            size={22}
+            color={inVault ? colors.primary : colors.foreground}
+          />
+        </TouchableOpacity>
       </View>
 
       <ScrollView
