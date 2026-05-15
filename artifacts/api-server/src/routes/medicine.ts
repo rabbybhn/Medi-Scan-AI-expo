@@ -54,7 +54,7 @@ router.post("/medicine/analyze", async (req, res) => {
 
   const [aiResponse, imageUrl] = await Promise.all([
     genai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-1.5-pro",
       contents: [
         {
           role: "user",
