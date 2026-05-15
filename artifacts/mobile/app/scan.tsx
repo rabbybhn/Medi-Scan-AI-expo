@@ -6,6 +6,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import React, { useRef, useState, useCallback, useEffect } from "react";
 import {
   ActivityIndicator,
+  Image as RNImage,
   Animated,
   Easing,
   Platform,
@@ -19,6 +20,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
 import { addScanToHistory } from "@/hooks/useLocalHistory";
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const AppLogo = require("../assets/logo.png") as number;
 
 type Phase = "camera" | "analyzing" | "error";
 
@@ -90,7 +94,7 @@ function AnalyzingOverlay({
           <View style={styles.analyzeCard}>
             <View style={styles.spinnerWrap}>
               <Animated.View style={[styles.spinnerRing, { transform: [{ rotate: spin }] }]} />
-              <MaterialCommunityIcons name="shield-plus-outline" size={30} color="#0052cc" />
+              <RNImage source={AppLogo} style={styles.spinnerLogo} resizeMode="contain" />
             </View>
             <Text style={styles.analyzeTitle}>Analyzing Medicine</Text>
             <Text style={styles.analyzeSubtitle}>AI is identifying your medicine</Text>
@@ -359,6 +363,7 @@ const styles = StyleSheet.create({
     borderTopColor: "transparent",
     borderRightColor: "transparent",
   },
+  spinnerLogo: { width: 48, height: 24 },
   analyzeTitle: { fontSize: 20, fontFamily: "Manrope_700Bold", fontWeight: "700", color: "#0a1628", letterSpacing: -0.3 },
   analyzeSubtitle: { fontSize: 14, fontFamily: "Inter_400Regular", color: "#5a6a85", textAlign: "center", lineHeight: 20 },
   dots: { flexDirection: "row", gap: 6, marginTop: 4 },

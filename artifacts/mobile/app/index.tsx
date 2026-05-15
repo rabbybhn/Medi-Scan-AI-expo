@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
 import {
   Animated,
+  Image,
   Modal,
   Platform,
   Pressable,
@@ -16,6 +17,8 @@ import { useRouter } from "expo-router";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
 import { useLocalHistory, type LocalScanItem } from "@/hooks/useLocalHistory";
+
+const AppLogo = require("../assets/logo.png") as number;
 
 const DRAWER_WIDTH = 300;
 
@@ -100,13 +103,7 @@ function DrawerMenu({ visible, onClose }: { visible: boolean; onClose: () => voi
       >
         {/* Drawer header */}
         <View style={[styles.drawerHeader, { borderBottomColor: colors.outlineVariant }]}>
-          <View style={[styles.drawerLogoWrap, { backgroundColor: colors.primary }]}>
-            <MaterialCommunityIcons name="shield-plus-outline" size={22} color="#fff" />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.drawerTitle, { color: colors.foreground }]}>Medi Scan AI</Text>
-            <Text style={[styles.drawerSubtitle, { color: colors.mutedForeground }]}>Your health companion</Text>
-          </View>
+          <Image source={AppLogo} style={styles.drawerLogo} resizeMode="contain" />
           <TouchableOpacity onPress={onClose} style={styles.drawerCloseBtn}>
             <Ionicons name="close" size={22} color={colors.mutedForeground} />
           </TouchableOpacity>
@@ -137,8 +134,7 @@ function DrawerMenu({ visible, onClose }: { visible: boolean; onClose: () => voi
         </View>
 
         <View style={styles.drawerFooter}>
-          <MaterialCommunityIcons name="shield-plus-outline" size={18} color={colors.outline} />
-          <Text style={[styles.drawerFooterText, { color: colors.outline }]}>Medi Scan AI</Text>
+          <Image source={AppLogo} style={styles.drawerFooterLogo} resizeMode="contain" />
         </View>
       </Animated.View>
     </Modal>
@@ -177,10 +173,8 @@ export default function HomeScreen() {
           <TouchableOpacity style={styles.menuBtn} onPress={() => setDrawerOpen(true)}>
             <Ionicons name="menu" size={26} color={colors.foreground} />
           </TouchableOpacity>
-          <Text style={[styles.appName, { color: colors.primary }]}>Medi Scan AI</Text>
-          <View style={[styles.avatar, { backgroundColor: colors.surfaceContainer }]}>
-            <MaterialCommunityIcons name="shield-plus-outline" size={20} color={colors.primary} />
-          </View>
+          <Image source={AppLogo} style={styles.headerLogo} resizeMode="contain" />
+          <View style={{ width: 38 }} />
         </View>
 
         {/* Greeting */}
@@ -269,8 +263,7 @@ const styles = StyleSheet.create({
 
   header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 24 },
   menuBtn: { padding: 4 },
-  appName: { fontSize: 18, fontFamily: "Manrope_700Bold", fontWeight: "700", letterSpacing: -0.3 },
-  avatar: { width: 38, height: 38, borderRadius: 19, alignItems: "center", justifyContent: "center" },
+  headerLogo: { height: 32, width: 140 },
 
   greeting: { marginBottom: 32 },
   greetingTitle: { fontSize: 32, fontFamily: "Manrope_700Bold", fontWeight: "700", letterSpacing: -0.5, lineHeight: 40 },
@@ -304,16 +297,14 @@ const styles = StyleSheet.create({
 
   drawerBackdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.45)" },
   drawer: { position: "absolute", top: 0, bottom: 0, left: 0, width: DRAWER_WIDTH, shadowColor: "#000", shadowOffset: { width: 4, height: 0 }, shadowOpacity: 0.18, shadowRadius: 20, elevation: 16 },
-  drawerHeader: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 20, paddingBottom: 20, borderBottomWidth: StyleSheet.hairlineWidth, marginBottom: 8 },
-  drawerLogoWrap: { width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center", flexShrink: 0 },
-  drawerTitle: { fontSize: 15, fontFamily: "Manrope_700Bold", fontWeight: "700" },
-  drawerSubtitle: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 1 },
+  drawerHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, paddingBottom: 20, borderBottomWidth: StyleSheet.hairlineWidth, marginBottom: 8 },
+  drawerLogo: { height: 36, width: 160 },
   drawerCloseBtn: { padding: 4 },
   drawerItems: { paddingHorizontal: 12, flex: 1 },
   drawerItem: { flexDirection: "row", alignItems: "center", gap: 14, paddingVertical: 16, paddingHorizontal: 8, borderBottomWidth: StyleSheet.hairlineWidth },
   drawerItemIcon: { width: 40, height: 40, borderRadius: 10, alignItems: "center", justifyContent: "center", flexShrink: 0 },
   drawerItemLabel: { fontSize: 15, fontFamily: "Manrope_700Bold", fontWeight: "700" },
   drawerItemSub: { fontSize: 12, fontFamily: "Inter_400Regular" },
-  drawerFooter: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingTop: 16 },
-  drawerFooterText: { fontSize: 13, fontFamily: "Inter_400Regular" },
+  drawerFooter: { alignItems: "center", justifyContent: "center", paddingTop: 16 },
+  drawerFooterLogo: { height: 28, width: 120, opacity: 0.45 },
 });
