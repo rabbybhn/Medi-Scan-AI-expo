@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { GoogleGenAI } from "@google/genai";
+import OpenAI from "openai";
 import { db } from "@workspace/db";
 import { scanHistoryTable } from "@workspace/db/schema";
 import { desc, eq } from "drizzle-orm";
@@ -7,7 +7,10 @@ import { ObjectStorageService } from "../lib/objectStorage.js";
 
 const router = Router();
 const storage = new ObjectStorageService();
-const genai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const openai = new OpenAI({
+  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
+});
 
 const SYSTEM_PROMPT = `You are a pharmaceutical expert assistant. When shown an image of medicine (pill, tablet, capsule, bottle, blister pack, or packaging), identify it and provide accurate, helpful information.
 
@@ -53,27 +56,29 @@ router.post("/medicine/analyze", async (req, res) => {
     : imageBase64;
 
   const [aiResponse, imageUrl] = await Promise.all([
-    genai.models.generateContent({
-      model: "gemini-1.5-pro",
-      contents: [
+    openai.chat.completions.create({
+      model: "gpt-5.4",
+      max_completion_tokens: 1024,
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
         {
           role: "user",
-          parts: [
-            { inlineData: { mimeType: "image/jpeg", data: base64Data } },
-            { text: "Please identify this medicine and provide detailed information about it." },
+          content: [
+            {
+              type: "image_url",
+              image_url: { url: `data:image/jpeg;base64,${base64Data}`, detail: "high" },
+            },
+            { type: "text", text: "Please identify this medicine and provide detailed information about it." },
           ],
         },
       ],
-      config: {
-        systemInstruction: SYSTEM_PROMPT,
-        responseMimeType: "application/json",
-        maxOutputTokens: 1024,
-      },
     }).catch((err) => { req.log.error({ err }, "AI analysis failed"); return null; }),
     uploadImageToStorage(base64Data),
   ]);
 
-  if (!aiResponse?.text) {
+  const rawText = aiResponse?.choices?.[0]?.message?.content ?? null;
+
+  if (!rawText) {
     res.status(500).json({ error: "Failed to analyze medicine" });
     return;
   }
@@ -89,7 +94,8 @@ router.post("/medicine/analyze", async (req, res) => {
   };
 
   try {
-    parsed = JSON.parse(aiResponse.text) as typeof parsed;
+    const cleaned = rawText.replace(/^```json\s*/i, "").replace(/```\s*$/i, "").trim();
+    parsed = JSON.parse(cleaned) as typeof parsed;
   } catch {
     res.status(500).json({ error: "Failed to parse AI response" });
     return;
