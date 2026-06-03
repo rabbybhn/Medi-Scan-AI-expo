@@ -17,6 +17,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons, MaterialCommunityIcons, FontAwesome5, Feather } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
+import { useLanguage } from "@/hooks/useLanguage";
 import { addScanToHistory } from "@/hooks/useLocalHistory";
 
 interface MedicineResult {
@@ -94,6 +95,7 @@ export default function ResultScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const colors = useColors();
+  const { t } = useLanguage();
   const [result, setResult] = useState<MedicineResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

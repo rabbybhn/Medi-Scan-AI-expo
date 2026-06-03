@@ -17,20 +17,31 @@ import { useRouter } from "expo-router";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
 import { useLocalHistory, type LocalScanItem } from "@/hooks/useLocalHistory";
+import { useLanguage } from "@/hooks/useLanguage";
+import type { Lang } from "@/constants/i18n";
 
 const AppLogo = require("../assets/logo.png") as number;
 
 const DRAWER_WIDTH = 300;
 
-function timeAgo(dateStr: string): string {
+function timeAgo(dateStr: string, lang: Lang): string {
   const now = Date.now();
   const then = new Date(dateStr).getTime();
   const diff = Math.floor((now - then) / 1000);
-  if (diff < 60) return "Just now";
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
-  return new Date(dateStr).toLocaleDateString();
+  if (diff < 60) return lang === "bn" ? "এইমাত্র" : "Just now";
+  if (diff < 3600) {
+    const n = Math.floor(diff / 60);
+    return lang === "bn" ? `${n} মিনিট আগে` : `${n}m ago`;
+  }
+  if (diff < 86400) {
+    const n = Math.floor(diff / 3600);
+    return lang === "bn" ? `${n} ঘণ্টা আগে` : `${n}h ago`;
+  }
+  if (diff < 604800) {
+    const n = Math.floor(diff / 86400);
+    return lang === "bn" ? `${n} দিন আগে` : `${n}d ago`;
+  }
+  return new Date(dateStr).toLocaleDateString(lang === "bn" ? "bn-BD" : "en-US");
 }
 
 function BottomTab({
@@ -60,6 +71,7 @@ function BottomTab({
 function DrawerMenu({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const { t, lang } = useLanguage();
   const slideAnim = useRef(new Animated.Value(-DRAWER_WIDTH)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const native = Platform.OS !== "web";
@@ -79,9 +91,9 @@ function DrawerMenu({ visible, onClose }: { visible: boolean; onClose: () => voi
   }, [visible]);
 
   const menuItems = [
-    { icon: "information-circle-outline", label: "এই অ্যাপ সম্পর্কে", sub: "সংস্করণ ১.০.০ • মেডি স্ক্যান AI" },
-    { icon: "language-outline", label: "অ্যাপের ভাষা", sub: "বাংলা" },
-    { icon: "code-slash-outline", label: "ডেভেলপারদের সম্পর্কে", sub: "আপনার স্বাস্থ্যের কথা ভেবে তৈরি" },
+    { icon: "information-circle-outline", label: t("drawer.about"), sub: t("drawer.aboutSub") },
+    { icon: "language-outline", label: t("drawer.language"), sub: lang === "bn" ? "বাংলা" : "English" },
+    { icon: "code-slash-outline", label: t("drawer.developer"), sub: t("drawer.developerSub") },
   ];
 
   return (
@@ -101,7 +113,6 @@ function DrawerMenu({ visible, onClose }: { visible: boolean; onClose: () => voi
           },
         ]}
       >
-        {/* Drawer header */}
         <View style={[styles.drawerHeader, { borderBottomColor: colors.outlineVariant }]}>
           <Image source={AppLogo} style={styles.drawerLogo} resizeMode="contain" />
           <TouchableOpacity onPress={onClose} style={styles.drawerCloseBtn}>
@@ -109,7 +120,6 @@ function DrawerMenu({ visible, onClose }: { visible: boolean; onClose: () => voi
           </TouchableOpacity>
         </View>
 
-        {/* Menu items */}
         <View style={styles.drawerItems}>
           {menuItems.map((item, index) => (
             <TouchableOpacity
@@ -146,9 +156,14 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const { t, lang, setLang } = useLanguage();
 
   const topPad = Platform.OS === "web" ? 52 : insets.top;
   const bottomPad = Platform.OS === "web" ? 20 : insets.bottom;
+
+  const h = new Date().getHours();
+  const greetingKey =
+    h < 12 ? "home.goodMorning" : h < 17 ? "home.goodAfternoon" : h < 21 ? "home.goodEvening" : "home.goodNight";
 
   const { items, isLoading, reload } = useLocalHistory();
   const recentItems = items.slice(0, 3);
@@ -174,14 +189,35 @@ export default function HomeScreen() {
             <Ionicons name="menu" size={26} color={colors.foreground} />
           </TouchableOpacity>
           <Image source={AppLogo} style={styles.headerLogo} resizeMode="contain" />
-          <View style={{ width: 38 }} />
+
+          {/* EN / বাং language toggle */}
+          <View style={[styles.langPill, { backgroundColor: colors.surfaceContainerLow, borderColor: colors.outlineVariant }]}>
+            <TouchableOpacity
+              onPress={() => void setLang("en")}
+              style={[styles.langOption, lang === "en" && { backgroundColor: colors.primary }]}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.langOptionText, { color: lang === "en" ? "#fff" : colors.mutedForeground }]}>
+                EN
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => void setLang("bn")}
+              style={[styles.langOption, lang === "bn" && { backgroundColor: colors.primary }]}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.langOptionText, { color: lang === "bn" ? "#fff" : colors.mutedForeground }]}>
+                বাং
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Greeting */}
         <View style={styles.greeting}>
-          <Text style={[styles.greetingTitle, { color: colors.foreground }]}>স্বাগতম</Text>
+          <Text style={[styles.greetingTitle, { color: colors.foreground }]}>{t("home.greeting")}</Text>
           <Text style={[styles.greetingSubtitle, { color: colors.mutedForeground }]}>
-            আজ আপনার স্বাস্থ্য যাত্রায় এগিয়ে থাকুন।
+            {t(greetingKey)}
           </Text>
         </View>
 
@@ -194,14 +230,14 @@ export default function HomeScreen() {
           >
             <Ionicons name="camera" size={40} color="#fff" />
           </TouchableOpacity>
-          <Text style={[styles.scanLabel, { color: colors.primary }]}>ওষুধ স্ক্যান করুন</Text>
+          <Text style={[styles.scanLabel, { color: colors.primary }]}>{t("home.scanLabel")}</Text>
         </View>
 
         {/* Recent Activity */}
         <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>সাম্প্রতিক কার্যক্রম</Text>
+          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>{t("home.recentActivity")}</Text>
           <TouchableOpacity onPress={() => router.push("/history")}>
-            <Text style={[styles.viewHistory, { color: colors.primary }]}>ইতিহাস দেখুন</Text>
+            <Text style={[styles.viewHistory, { color: colors.primary }]}>{t("home.viewHistory")}</Text>
           </TouchableOpacity>
         </View>
 
@@ -209,7 +245,7 @@ export default function HomeScreen() {
           <View style={[styles.emptyCard, { backgroundColor: colors.surfaceContainerLow, borderColor: colors.outlineVariant }]}>
             <MaterialCommunityIcons name="line-scan" size={28} color={colors.outline} />
             <Text style={[styles.emptyText, { color: colors.mutedForeground }]}>
-              এখনো কোনো স্ক্যান নেই। শুরু করতে "ওষুধ স্ক্যান করুন" এ চাপুন।
+              {t("home.emptyText")}
             </Text>
           </View>
         )}
@@ -228,10 +264,10 @@ export default function HomeScreen() {
               <View style={styles.cardRow}>
                 <View style={[styles.chip, { backgroundColor: scan.identified ? colors.successContainer : colors.surfaceContainer }]}>
                   <Text style={[styles.chipText, { color: scan.identified ? colors.success : colors.mutedForeground }]}>
-                    {scan.identified ? "শনাক্ত" : "অজানা"}
+                    {t(scan.identified ? "identified" : "unknown")}
                   </Text>
                 </View>
-                <Text style={[styles.cardTime, { color: colors.outline }]}>{timeAgo(scan.createdAt)}</Text>
+                <Text style={[styles.cardTime, { color: colors.outline }]}>{timeAgo(scan.createdAt, lang)}</Text>
               </View>
               <Text style={[styles.cardTitle, { color: colors.foreground }]} numberOfLines={1}>{scan.name}</Text>
               <Text style={[styles.cardSub, { color: colors.mutedForeground }]} numberOfLines={2}>{scan.primaryUse}</Text>
@@ -248,10 +284,10 @@ export default function HomeScreen() {
           { backgroundColor: colors.card, borderTopColor: colors.outlineVariant, paddingBottom: bottomPad > 0 ? bottomPad : 12 },
         ]}
       >
-        <BottomTab icon="home" label="হোম" active />
-        <BottomTab icon="time-outline" label="ইতিহাস" active={false} onPress={() => router.push("/history")} />
-        <BottomTab icon="shield-checkmark-outline" label="ভল্ট" active={false} onPress={() => router.push("/vault")} />
-        <BottomTab icon="person-outline" label="প্রোফাইল" active={false} onPress={() => router.push("/profile")} />
+        <BottomTab icon="home" label={t("tab.home")} active />
+        <BottomTab icon="time-outline" label={t("tab.history")} active={false} onPress={() => router.push("/history")} />
+        <BottomTab icon="shield-checkmark-outline" label={t("tab.vault")} active={false} onPress={() => router.push("/vault")} />
+        <BottomTab icon="person-outline" label={t("tab.profile")} active={false} onPress={() => router.push("/profile")} />
       </View>
     </View>
   );
@@ -264,6 +300,25 @@ const styles = StyleSheet.create({
   header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 24 },
   menuBtn: { padding: 4 },
   headerLogo: { height: 32, width: 140 },
+
+  langPill: {
+    flexDirection: "row",
+    borderRadius: 20,
+    borderWidth: 1,
+    overflow: "hidden",
+    height: 32,
+  },
+  langOption: {
+    paddingHorizontal: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: 36,
+  },
+  langOptionText: {
+    fontSize: 12,
+    fontFamily: "Inter_600SemiBold",
+    fontWeight: "600",
+  },
 
   greeting: { marginBottom: 32 },
   greetingTitle: { fontSize: 32, fontFamily: "Manrope_700Bold", fontWeight: "700", letterSpacing: -0.5, lineHeight: 40 },

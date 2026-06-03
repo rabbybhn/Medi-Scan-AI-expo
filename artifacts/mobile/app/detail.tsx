@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
+import { useLanguage } from "@/hooks/useLanguage";
 import { getScanById, type LocalScanItem } from "@/hooks/useLocalHistory";
 import { isInVault, addToVault, removeFromVault } from "@/hooks/useVault";
 
@@ -37,6 +38,7 @@ function InfoCard({ icon, label, value, accent, colors }: {
 export default function DetailScreen() {
   const { scanId } = useLocalSearchParams<{ scanId: string }>();
   const colors = useColors();
+  const { t, lang } = useLanguage();
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
@@ -76,7 +78,7 @@ export default function DetailScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="chevron-back" size={24} color={colors.foreground} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.foreground }]}>স্ক্যান বিবরণ</Text>
+        <Text style={[styles.headerTitle, { color: colors.foreground }]}>{t("detail.headerTitle")}</Text>
         <TouchableOpacity onPress={toggleVault} style={styles.backBtn} disabled={vaultLoading}>
           <Ionicons
             name={inVault ? "bookmark" : "bookmark-outline"}
@@ -100,7 +102,7 @@ export default function DetailScreen() {
         {!isLoading && !item && (
           <View style={styles.center}>
             <MaterialCommunityIcons name="alert-circle-outline" size={48} color={colors.destructive} />
-            <Text style={[styles.statusText, { color: colors.mutedForeground }]}>স্ক্যান পাওয়া যায়নি</Text>
+            <Text style={[styles.statusText, { color: colors.mutedForeground }]}>{t("detail.notFound")}</Text>
           </View>
         )}
 
@@ -123,12 +125,12 @@ export default function DetailScreen() {
                     color={item.identified ? colors.success : colors.mutedForeground}
                   />
                   <Text style={[styles.badgeText, { color: item.identified ? colors.success : colors.mutedForeground }]}>
-                    {item.identified ? "শনাক্ত" : "অনিশ্চিত"}
+                    {t(item.identified ? "identified" : "uncertain")}
                   </Text>
                 </View>
               </View>
               <Text style={[styles.dateText, { color: colors.outline }]}>
-                {new Date(item.createdAt).toLocaleString()}
+                {new Date(item.createdAt).toLocaleString(lang === "bn" ? "bn-BD" : "en-US")}
               </Text>
 
               <View style={styles.cards}>

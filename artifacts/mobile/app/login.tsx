@@ -10,6 +10,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
+import { useLanguage } from "@/hooks/useLanguage";
 import { useAuth } from "@/lib/auth";
 
 export default function LoginScreen() {

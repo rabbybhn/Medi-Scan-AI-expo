@@ -19,6 +19,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
+import { useLanguage } from "@/hooks/useLanguage";
 import { addScanToHistory } from "@/hooks/useLocalHistory";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -44,6 +45,7 @@ function AnalyzingOverlay({
   topPad: number;
   bottomPad: number;
 }) {
+  const { t } = useLanguage();
   const spinAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const dotAnim1 = useRef(new Animated.Value(0.3)).current;
@@ -96,8 +98,8 @@ function AnalyzingOverlay({
               <Animated.View style={[styles.spinnerRing, { transform: [{ rotate: spin }] }]} />
               <RNImage source={AppLogo} style={styles.spinnerLogo} resizeMode="contain" />
             </View>
-            <Text style={styles.analyzeTitle}>ওষুধ বিশ্লেষণ করা হচ্ছে</Text>
-            <Text style={styles.analyzeSubtitle}>AI আপনার ওষুধ শনাক্ত করছে</Text>
+            <Text style={styles.analyzeTitle}>{t("scan.analyzingTitle")}</Text>
+            <Text style={styles.analyzeSubtitle}>{t("scan.analyzingSubtitle")}</Text>
             <View style={styles.dots}>
               <Animated.View style={[styles.dot, { opacity: dotAnim1 }]} />
               <Animated.View style={[styles.dot, { opacity: dotAnim2 }]} />
@@ -107,10 +109,10 @@ function AnalyzingOverlay({
         ) : (
           <View style={styles.analyzeCard}>
             <Ionicons name="alert-circle-outline" size={48} color="#ef4444" />
-            <Text style={styles.analyzeTitle}>বিশ্লেষণ ব্যর্থ হয়েছে</Text>
-            <Text style={styles.analyzeSubtitle}>{errorMsg}</Text>
+            <Text style={styles.analyzeTitle}>{t("scan.errorTitle")}</Text>
+            <Text style={styles.analyzeSubtitle}>{t("scan.errorMsg")}</Text>
             <TouchableOpacity style={styles.retryBtn} onPress={onRetry}>
-              <Text style={styles.retryBtnText}>আবার চেষ্টা করুন</Text>
+              <Text style={styles.retryBtnText}>{t("tryAgain")}</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -130,6 +132,7 @@ export default function ScanScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const colors = useColors();
+  const { t } = useLanguage();
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
@@ -220,10 +223,10 @@ export default function ScanScreen() {
           <Ionicons name="chevron-back" size={22} color={colors.primary} />
         </TouchableOpacity>
         <MaterialCommunityIcons name="camera-off" size={64} color={colors.outline} />
-        <Text style={[styles.permissionTitle, { color: colors.foreground }]}>ক্যামেরা অ্যাক্সেস প্রয়োজন</Text>
-        <Text style={[styles.permissionSubtitle, { color: colors.mutedForeground }]}>যেকোনো ওষুধে ক্যামেরা তাক করুন এবং তাৎক্ষণিক তথ্য পান</Text>
+        <Text style={[styles.permissionTitle, { color: colors.foreground }]}>{t("scan.permissionTitle")}</Text>
+        <Text style={[styles.permissionSubtitle, { color: colors.mutedForeground }]}>{t("scan.permissionSub")}</Text>
         <TouchableOpacity style={[styles.permissionBtn, { backgroundColor: colors.primary }]} onPress={requestPermission}>
-          <Text style={[styles.permissionBtnText, { color: colors.primaryForeground }]}>ক্যামেরা অনুমতি দিন</Text>
+          <Text style={[styles.permissionBtnText, { color: colors.primaryForeground }]}>{t("scan.permissionBtn")}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -245,12 +248,12 @@ export default function ScanScreen() {
               <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
                 <Ionicons name="chevron-back" size={26} color="#fff" />
               </TouchableOpacity>
-              <Text style={styles.headerTitle}>ওষুধ স্ক্যান করুন</Text>
+              <Text style={styles.headerTitle}>{t("scan.headerTitle")}</Text>
               <TouchableOpacity style={styles.headerBtn} onPress={() => setFacing(f => f === "back" ? "front" : "back")}>
                 <Ionicons name="camera-reverse-outline" size={26} color="#fff" />
               </TouchableOpacity>
             </View>
-            <Text style={styles.headerSubtitle}>লেবেল বা প্যাকেজিংয়ের দিকে তাক করুন</Text>
+            <Text style={styles.headerSubtitle}>{t("scan.headerSubtitle")}</Text>
           </LinearGradient>
 
           {/* Scan frame corners */}

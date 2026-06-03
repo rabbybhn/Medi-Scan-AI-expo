@@ -28,6 +28,7 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { LanguageProvider } from "@/hooks/useLanguage";
 
 if (process.env.EXPO_PUBLIC_DOMAIN) {
   setBaseUrl(`https://${process.env.EXPO_PUBLIC_DOMAIN}`);
@@ -123,6 +124,7 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
+      <LanguageProvider>
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
           <GestureHandlerRootView style={{ flex: 1 }}>
@@ -146,6 +148,7 @@ export default function RootLayout() {
           </GestureHandlerRootView>
         </QueryClientProvider>
       </ErrorBoundary>
+      </LanguageProvider>
     </SafeAreaProvider>
   );
 }

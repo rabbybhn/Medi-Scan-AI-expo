@@ -13,21 +13,33 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
+import { useLanguage } from "@/hooks/useLanguage";
+import type { Lang } from "@/constants/i18n";
 import { useLocalHistory, type LocalScanItem } from "@/hooks/useLocalHistory";
 
-function timeAgo(dateStr: string): string {
+function timeAgo(dateStr: string, lang: Lang): string {
   const now = Date.now();
   const then = new Date(dateStr).getTime();
   const diff = Math.floor((now - then) / 1000);
-  if (diff < 60) return "Just now";
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
-  return new Date(dateStr).toLocaleDateString();
+  if (diff < 60) return lang === "bn" ? "এইমাত্র" : "Just now";
+  if (diff < 3600) {
+    const n = Math.floor(diff / 60);
+    return lang === "bn" ? `${n} মিনিট আগে` : `${n}m ago`;
+  }
+  if (diff < 86400) {
+    const n = Math.floor(diff / 3600);
+    return lang === "bn" ? `${n} ঘণ্টা আগে` : `${n}h ago`;
+  }
+  if (diff < 604800) {
+    const n = Math.floor(diff / 86400);
+    return lang === "bn" ? `${n} দিন আগে` : `${n}d ago`;
+  }
+  return new Date(dateStr).toLocaleDateString(lang === "bn" ? "bn-BD" : "en-US");
 }
 
 function HistoryCard({ item, onPress }: { item: LocalScanItem; onPress: () => void }) {
   const colors = useColors();
+  const { t, lang } = useLanguage();
 
   return (
     <TouchableOpacity
@@ -46,10 +58,10 @@ function HistoryCard({ item, onPress }: { item: LocalScanItem; onPress: () => vo
         <View style={styles.cardTopRow}>
           <View style={[styles.chip, { backgroundColor: item.identified ? colors.successContainer : colors.surfaceContainer }]}>
             <Text style={[styles.chipText, { color: item.identified ? colors.success : colors.mutedForeground }]}>
-              {item.identified ? "শনাক্ত" : "অজানা"}
+              {t(item.identified ? "identified" : "unknown")}
             </Text>
           </View>
-          <Text style={[styles.timeText, { color: colors.outline }]}>{timeAgo(item.createdAt)}</Text>
+          <Text style={[styles.timeText, { color: colors.outline }]}>{timeAgo(item.createdAt, lang)}</Text>
         </View>
         <Text style={[styles.cardName, { color: colors.foreground }]} numberOfLines={1}>{item.name}</Text>
         <Text style={[styles.cardUse, { color: colors.mutedForeground }]} numberOfLines={2}>{item.primaryUse}</Text>
@@ -65,6 +77,7 @@ function HistoryCard({ item, onPress }: { item: LocalScanItem; onPress: () => vo
 
 export default function HistoryScreen() {
   const colors = useColors();
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
@@ -79,7 +92,7 @@ export default function HistoryScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="chevron-back" size={24} color={colors.foreground} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.foreground }]}>স্ক্যান ইতিহাস</Text>
+        <Text style={[styles.headerTitle, { color: colors.foreground }]}>{t("history.headerTitle")}</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -96,16 +109,16 @@ export default function HistoryScreen() {
             <View style={[styles.emptyIcon, { backgroundColor: colors.surfaceContainerLow }]}>
               <MaterialCommunityIcons name="history" size={48} color={colors.outline} />
             </View>
-            <Text style={[styles.emptyTitle, { color: colors.foreground }]}>এখনো কোনো স্ক্যান নেই</Text>
+            <Text style={[styles.emptyTitle, { color: colors.foreground }]}>{t("history.emptyTitle")}</Text>
             <Text style={[styles.emptySubtitle, { color: colors.mutedForeground }]}>
-              প্রথম ওষুধ স্ক্যান করুন এখানে দেখতে
+              {t("history.emptySubtitle")}
             </Text>
             <TouchableOpacity
               style={[styles.scanBtn, { backgroundColor: colors.primary }]}
               onPress={() => router.push("/scan")}
             >
               <Ionicons name="camera" size={18} color="#fff" />
-              <Text style={[styles.scanBtnText, { color: "#fff" }]}>ওষুধ স্ক্যান করুন</Text>
+              <Text style={[styles.scanBtnText, { color: "#fff" }]}>{t("scanMedicine")}</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -113,7 +126,7 @@ export default function HistoryScreen() {
         {items.length > 0 && (
           <View style={styles.list}>
             <Text style={[styles.countLabel, { color: colors.mutedForeground }]}>
-              {items.length}টি স্ক্যান এই ডিভাইসে সংরক্ষিত
+              {t("history.countLabel", { n: items.length, s: items.length !== 1 ? "s" : "" })}
             </Text>
             {items.map((item) => (
               <HistoryCard

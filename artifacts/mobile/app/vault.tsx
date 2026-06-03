@@ -17,6 +17,7 @@ import { useRouter } from "expo-router";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Notifications from "expo-notifications";
 import { useColors } from "@/hooks/useColors";
+import { useLanguage } from "@/hooks/useLanguage";
 import { useVault, type VaultItem, type ReminderSettings, removeFromVault, updateReminder } from "@/hooks/useVault";
 import { getScanById, type LocalScanItem } from "@/hooks/useLocalHistory";
 
@@ -30,11 +31,11 @@ Notifications.setNotificationHandler({
   }),
 });
 
-const FREQUENCY_OPTIONS: { key: ReminderSettings["frequency"]; label: string; hour: number; minute: number; icon: string }[] = [
-  { key: "morning",   label: "সকাল",   hour: 8,  minute: 0,  icon: "sunny-outline" },
-  { key: "afternoon", label: "দুপুর", hour: 13, minute: 0,  icon: "partly-sunny-outline" },
-  { key: "evening",   label: "সন্ধ্যা",   hour: 19, minute: 0,  icon: "moon-outline" },
-  { key: "daily",     label: "কাস্টম",    hour: 9,  minute: 0,  icon: "alarm-outline" },
+const FREQUENCY_OPTIONS: { key: ReminderSettings["frequency"]; labelKey: string; hour: number; minute: number; icon: string }[] = [
+  { key: "morning",   labelKey: "vault.morning",   hour: 8,  minute: 0,  icon: "sunny-outline" },
+  { key: "afternoon", labelKey: "vault.afternoon", hour: 13, minute: 0,  icon: "partly-sunny-outline" },
+  { key: "evening",   labelKey: "vault.evening",   hour: 19, minute: 0,  icon: "moon-outline" },
+  { key: "daily",     labelKey: "vault.custom",    hour: 9,  minute: 0,  icon: "alarm-outline" },
 ];
 
 function ReminderModal({
@@ -53,6 +54,7 @@ function ReminderModal({
   onSaved: () => void;
 }) {
   const colors = useColors();
+  const { t } = useLanguage();
   const [selected, setSelected] = useState<ReminderSettings["frequency"]>(existing?.frequency ?? "morning");
   const [saving, setSaving] = useState(false);
 
@@ -72,8 +74,8 @@ function ReminderModal({
     await Notifications.cancelAllScheduledNotificationsAsync();
     const id = await Notifications.scheduleNotificationAsync({
       content: {
-        title: "ওষুধের রিমাইন্ডার",
-        body: `${medicineName} খাওয়ার সময় হয়েছে`,
+        title: t("vault.notifTitle"),
+        body: t("vault.notifBody", { name: medicineName }),
         sound: true,
       },
       trigger: {
@@ -96,8 +98,8 @@ function ReminderModal({
         notificationId = await scheduleNotification(selected, option.hour, option.minute);
       } else if (Platform.OS !== "web") {
         Alert.alert(
-          "বিজ্ঞপ্তি অক্ষম",
-          "রিমাইন্ডার পেতে সেটিংসে বিজ্ঞপ্তি চালু করুন। আপনার রিমাইন্ডার সংরক্ষিত হয়েছে।"
+          t("vault.notifDisabledTitle"),
+          t("vault.notifDisabledMsg")
         );
       }
 
@@ -136,7 +138,7 @@ function ReminderModal({
       <View style={[styles.sheet, { backgroundColor: colors.card }]}>
         <View style={[styles.sheetHandle, { backgroundColor: colors.outlineVariant }]} />
 
-        <Text style={[styles.sheetTitle, { color: colors.foreground }]}>ওষুধের রিমাইন্ডার</Text>
+        <Text style={[styles.sheetTitle, { color: colors.foreground }]}>{t("vault.reminderTitle")}</Text>
         <Text style={[styles.sheetSub, { color: colors.mutedForeground }]} numberOfLines={2}>
           {medicineName}
         </Text>
@@ -158,7 +160,7 @@ function ReminderModal({
                 activeOpacity={0.8}
               >
                 <Ionicons name={opt.icon as never} size={22} color={active ? "#fff" : colors.foreground} />
-                <Text style={[styles.freqLabel, { color: active ? "#fff" : colors.foreground }]}>{opt.label}</Text>
+                <Text style={[styles.freqLabel, { color: active ? "#fff" : colors.foreground }]}>{t(opt.labelKey)}</Text>
                 <Text style={[styles.freqTime, { color: active ? "rgba(255,255,255,0.75)" : colors.mutedForeground }]}>
                   {opt.hour < 12
                     ? `${opt.hour}:00 AM`
