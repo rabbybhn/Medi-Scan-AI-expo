@@ -17,18 +17,22 @@ import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
+  Appearance,
   Easing,
   Image,
   Platform,
   StyleSheet,
   View,
 } from "react-native";
+
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { LanguageProvider } from "@/hooks/useLanguage";
+
+Appearance.setColorScheme("light");
 
 if (process.env.EXPO_PUBLIC_DOMAIN) {
   setBaseUrl(`https://${process.env.EXPO_PUBLIC_DOMAIN}`);
