@@ -131,7 +131,7 @@ export default function ResultScreen() {
 
         await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       } catch {
-        setError("Could not analyze medicine. Please try again.");
+        setError("ওষুধ বিশ্লেষণ করা সম্ভব হয়নি। আবার চেষ্টা করুন।");
         await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       } finally {
         setLoading(false);
@@ -147,7 +147,7 @@ export default function ResultScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="chevron-back" size={24} color={colors.foreground} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.foreground }]}>Analysis Result</Text>
+        <Text style={[styles.headerTitle, { color: colors.foreground }]}>বিশ্লেষণ ফলাফল</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -167,9 +167,9 @@ export default function ResultScreen() {
           <View style={styles.loadingContainer}>
             <View style={[styles.loadingCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
               <ActivityIndicator size="large" color={colors.primary} />
-              <Text style={[styles.loadingTitle, { color: colors.foreground }]}>Analyzing Medicine</Text>
+              <Text style={[styles.loadingTitle, { color: colors.foreground }]}>ওষুধ বিশ্লেষণ করা হচ্ছে</Text>
               <Text style={[styles.loadingSubtitle, { color: colors.mutedForeground }]}>
-                AI is identifying your medicine...
+                AI আপনার ওষুধ শনাক্ত করছে...
               </Text>
             </View>
           </View>
@@ -184,7 +184,7 @@ export default function ResultScreen() {
                 style={[styles.retryBtn, { backgroundColor: colors.primary }]}
                 onPress={() => router.back()}
               >
-                <Text style={[styles.retryBtnText, { color: colors.primaryForeground }]}>Try Again</Text>
+                <Text style={[styles.retryBtnText, { color: colors.primaryForeground }]}>আবার চেষ্টা করুন</Text>
               </Pressable>
             </View>
           </View>
@@ -213,23 +213,23 @@ export default function ResultScreen() {
                     { color: result.identified ? colors.success : colors.warning },
                   ]}
                 >
-                  {result.identified ? "Identified" : "Uncertain"}
+                  {result.identified ? "শনাক্ত" : "অনিশ্চিত"}
                 </Text>
               </View>
             </View>
 
             <View style={styles.cards}>
-              <InfoCard icon="medical" iconLib="Ionicons" label="Primary Use" value={result.primaryUse} accent="#0ea5e9" colors={colors} />
-              <InfoCard icon="pill" iconLib="MaterialCommunityIcons" label="Dosage" value={result.dosage} accent="#8b5cf6" colors={colors} />
-              <InfoCard icon="tag" iconLib="Feather" label="Approximate Price" value={result.approximatePrice} accent="#10b981" colors={colors} />
-              <InfoCard icon="information-circle-outline" iconLib="Ionicons" label="General Information" value={result.generalInfo} accent="#06b6d4" colors={colors} />
-              <InfoCard icon="warning-outline" iconLib="Ionicons" label="Warnings & Side Effects" value={result.warnings} accent="#f59e0b" colors={colors} />
+              <InfoCard icon="medical" iconLib="Ionicons" label="প্রাথমিক ব্যবহার" value={result.primaryUse} accent="#0ea5e9" colors={colors} />
+              <InfoCard icon="pill" iconLib="MaterialCommunityIcons" label="ডোজ" value={result.dosage} accent="#8b5cf6" colors={colors} />
+              <InfoCard icon="tag" iconLib="Feather" label="আনুমানিক মূল্য" value={result.approximatePrice} accent="#10b981" colors={colors} />
+              <InfoCard icon="information-circle-outline" iconLib="Ionicons" label="সাধারণ তথ্য" value={result.generalInfo} accent="#06b6d4" colors={colors} />
+              <InfoCard icon="warning-outline" iconLib="Ionicons" label="সতর্কতা ও পার্শ্বপ্রতিক্রিয়া" value={result.warnings} accent="#f59e0b" colors={colors} />
             </View>
 
             <View style={[styles.disclaimer, { backgroundColor: colors.muted, borderColor: colors.border }]}>
               <Feather name="alert-triangle" size={14} color={colors.mutedForeground} />
               <Text style={[styles.disclaimerText, { color: colors.mutedForeground }]}>
-                For informational purposes only. Always consult a healthcare professional before taking any medication.
+                শুধুমাত্র তথ্যের জন্য। যেকোনো ওষুধ গ্রহণের আগে সর্বদা একজন স্বাস্থ্যসেবা পেশাদারের পরামর্শ নিন।
               </Text>
             </View>
 
@@ -239,7 +239,7 @@ export default function ResultScreen() {
             >
               <MaterialCommunityIcons name="line-scan" size={20} color={colors.primaryForeground} />
               <Text style={[styles.scanAgainText, { color: colors.primaryForeground }]}>
-                Scan Another Medicine
+                আরেকটি ওষুধ স্ক্যান করুন
               </Text>
             </TouchableOpacity>
           </View>

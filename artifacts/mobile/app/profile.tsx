@@ -98,7 +98,7 @@ export default function ProfileScreen() {
   async function pickPhoto() {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
-      Alert.alert("Permission needed", "Allow photo access to change your profile picture.");
+      Alert.alert("অনুমতি প্রয়োজন", "প্রোফাইল ছবি পরিবর্তন করতে ফটো অ্যাক্সেসের অনুমতি দিন।");
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -121,9 +121,9 @@ export default function ProfileScreen() {
   async function shareApp() {
     try {
       await Share.share({
-        title: "MediScan — AI Medicine Scanner",
+        title: "মেডিস্ক্যান — AI ওষুধ স্ক্যানার",
         message:
-          "Check out MediScan! Point your camera at any medicine and instantly get dosage info, uses, and warnings. Download it now.",
+          "মেডিস্ক্যান দেখুন! যেকোনো ওষুধে ক্যামেরা তাক করুন এবং তাৎক্ষণিকভাবে ডোজ, ব্যবহার ও সতর্কতার তথ্য পান। এখনই ডাউনলোড করুন।",
       });
     } catch {
     }
@@ -154,10 +154,10 @@ export default function ProfileScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="chevron-back" size={24} color={colors.foreground} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.foreground }]}>Profile</Text>
+        <Text style={[styles.headerTitle, { color: colors.foreground }]}>প্রোফাইল</Text>
         <TouchableOpacity onPress={editing ? cancelEdit : startEdit} style={styles.editBtn}>
           <Text style={[styles.editBtnText, { color: colors.primary }]}>
-            {editing ? "Cancel" : "Edit"}
+            {editing ? "বাতিল" : "সম্পাদনা"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -181,23 +181,23 @@ export default function ProfileScreen() {
             </View>
           </Pressable>
           <Text style={[styles.avatarHint, { color: colors.mutedForeground }]}>
-            Tap to change photo
+            ছবি পরিবর্তন করতে চাপুন
           </Text>
         </View>
 
         {/* Info fields */}
-        <SectionLabel label="PERSONAL INFO" colors={colors} />
+        <SectionLabel label="ব্যক্তিগত তথ্য" colors={colors} />
         <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.outlineVariant }]}>
           <InfoField
-            label="Name"
+            label="নাম"
             value={editing ? draft.name : profile.name || "—"}
             editing={editing}
-            placeholder="Your full name"
+            placeholder="আপনার পূর্ণ নাম"
             onChange={(v) => setDraft((d) => ({ ...d, name: v }))}
             colors={colors}
           />
           <InfoField
-            label="Email"
+            label="ইমেইল"
             value={editing ? draft.email : profile.email || "—"}
             editing={editing}
             placeholder="your@email.com"
@@ -206,10 +206,10 @@ export default function ProfileScreen() {
             colors={colors}
           />
           <InfoField
-            label="Phone"
+            label="ফোন"
             value={editing ? draft.phone : profile.phone || "—"}
             editing={editing}
-            placeholder="+1 (000) 000-0000"
+            placeholder="+880 (000) 000-0000"
             keyboardType="phone-pad"
             onChange={(v) => setDraft((d) => ({ ...d, phone: v }))}
             colors={colors}
@@ -223,17 +223,17 @@ export default function ProfileScreen() {
             onPress={saveEdit}
             activeOpacity={0.85}
           >
-            <Text style={styles.saveBtnText}>Save Changes</Text>
+            <Text style={styles.saveBtnText}>পরিবর্তন সংরক্ষণ করুন</Text>
           </TouchableOpacity>
         )}
 
         {/* Preferences */}
-        <SectionLabel label="PREFERENCES" colors={colors} />
+        <SectionLabel label="পছন্দসমূহ" colors={colors} />
         <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.outlineVariant }]}>
           <SettingsRow
             icon="moon"
             iconBg="#3b2f7f"
-            label="Dark Mode"
+            label="ডার্ক মোড"
             colors={colors}
             noBorder
             right={
@@ -248,12 +248,12 @@ export default function ProfileScreen() {
         </View>
 
         {/* Actions */}
-        <SectionLabel label="MORE" colors={colors} />
+        <SectionLabel label="আরো" colors={colors} />
         <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.outlineVariant }]}>
           <SettingsRow
             icon="share-social"
             iconBg="#0052cc"
-            label="Share This App"
+            label="এই অ্যাপ শেয়ার করুন"
             colors={colors}
             onPress={shareApp}
             noBorder

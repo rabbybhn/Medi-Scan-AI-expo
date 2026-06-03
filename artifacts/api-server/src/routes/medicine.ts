@@ -12,18 +12,20 @@ const openai = new OpenAI({
   apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
 });
 
-const SYSTEM_PROMPT = `You are a pharmaceutical expert assistant. When shown an image of medicine (pill, tablet, capsule, bottle, blister pack, or packaging), identify it and provide accurate, helpful information.
+const SYSTEM_PROMPT = `আপনি একজন ফার্মাসিউটিক্যাল বিশেষজ্ঞ সহকারী। যখন কোনো ওষুধের ছবি (বড়ি, ট্যাবলেট, ক্যাপসুল, বোতল, ব্লিস্টার প্যাক বা প্যাকেজিং) দেখানো হয়, তখন সেটি শনাক্ত করুন এবং সঠিক, সহায়ক তথ্য প্রদান করুন।
 
-Always respond with a JSON object with these exact fields:
-- identified (boolean): whether you could identify the medicine
-- name (string): full medicine name (brand + generic if known), or "Unknown Medicine" if not identified
-- dosage (string): recommended dosage, frequency, and instructions. Include standard adult dosage.
-- primaryUse (string): primary medical indication and what condition(s) it treats
-- approximatePrice (string): approximate retail price range in USD (e.g. "$5-$15 for 30 tablets").
-- generalInfo (string): brief overview including drug class, mechanism of action, and relevant details
-- warnings (string): key warnings, contraindications, and important side effects to be aware of
+সমস্ত উত্তর অবশ্যই বাংলায় লিখতে হবে।
 
-Respond ONLY with valid JSON — no markdown, no explanation.`;
+সর্বদা নিচের নির্দিষ্ট ফিল্ডসহ একটি JSON অবজেক্টে উত্তর দিন:
+- identified (boolean): ওষুধটি শনাক্ত করা সম্ভব হয়েছে কিনা
+- name (string): ওষুধের পূর্ণ নাম (ব্র্যান্ড + জেনেরিক যদি জানা থাকে), অথবা শনাক্ত না হলে "অজানা ওষুধ"
+- dosage (string): প্রস্তাবিত ডোজ, ফ্রিকোয়েন্সি এবং নির্দেশনা। প্রাপ্তবয়স্কদের জন্য স্ট্যান্ডার্ড ডোজ অন্তর্ভুক্ত করুন।
+- primaryUse (string): প্রাথমিক চিকিৎসাগত ব্যবহার এবং কোন রোগের চিকিৎসায় ব্যবহৃত হয়
+- approximatePrice (string): আনুমানিক খুচরা মূল্য পরিসীমা টাকায় (যেমন: "৳৫০-৳১৫০ প্রতি ১০টি ট্যাবলেট")
+- generalInfo (string): ওষুধের শ্রেণী, কার্যপদ্ধতি এবং প্রাসঙ্গিক তথ্যসহ সংক্ষিপ্ত বিবরণ
+- warnings (string): গুরুত্বপূর্ণ সতর্কতা, প্রতিনির্দেশনা এবং পার্শ্বপ্রতিক্রিয়া
+
+শুধুমাত্র বৈধ JSON দিয়ে উত্তর দিন — কোনো মার্কডাউন বা ব্যাখ্যা নয়।`;
 
 async function uploadImageToStorage(base64Data: string): Promise<string | null> {
   try {
@@ -68,7 +70,7 @@ router.post("/medicine/analyze", async (req, res) => {
               type: "image_url",
               image_url: { url: `data:image/jpeg;base64,${base64Data}`, detail: "high" },
             },
-            { type: "text", text: "Please identify this medicine and provide detailed information about it." },
+            { type: "text", text: "এই ওষুধটি শনাক্ত করুন এবং বাংলায় বিস্তারিত তথ্য প্রদান করুন।" },
           ],
         },
       ],
@@ -104,12 +106,12 @@ router.post("/medicine/analyze", async (req, res) => {
   const record = {
     userEmail: email,
     identified: parsed.identified ?? false,
-    name: parsed.name ?? "Unknown Medicine",
-    dosage: parsed.dosage ?? "Consult a healthcare professional",
-    primaryUse: parsed.primaryUse ?? "Unable to determine",
-    approximatePrice: parsed.approximatePrice ?? "Price unavailable",
-    generalInfo: parsed.generalInfo ?? "Unable to analyze",
-    warnings: parsed.warnings ?? "Consult a healthcare professional before use",
+    name: parsed.name ?? "অজানা ওষুধ",
+    dosage: parsed.dosage ?? "স্বাস্থ্যসেবা পেশাদারের পরামর্শ নিন",
+    primaryUse: parsed.primaryUse ?? "নির্ধারণ করা সম্ভব হয়নি",
+    approximatePrice: parsed.approximatePrice ?? "মূল্য অনুপলব্ধ",
+    generalInfo: parsed.generalInfo ?? "বিশ্লেষণ করা সম্ভব হয়নি",
+    warnings: parsed.warnings ?? "ব্যবহারের আগে স্বাস্থ্যসেবা পেশাদারের পরামর্শ নিন",
     imageUrl: imageUrl ?? null,
   };
 

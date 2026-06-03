@@ -21,10 +21,10 @@ export default function LoginScreen() {
   const bottomPad = Platform.OS === "web" ? 24 : insets.bottom;
 
   const features = [
-    { icon: "camera-outline", text: "Scan any medicine instantly" },
-    { icon: "information-circle-outline", text: "Dosage, uses & price info" },
-    { icon: "time-outline", text: "Personalized scan history" },
-    { icon: "shield-checkmark-outline", text: "Secure & private" },
+    { icon: "camera-outline", text: "তাৎক্ষণিকভাবে যেকোনো ওষুধ স্ক্যান করুন" },
+    { icon: "information-circle-outline", text: "ডোজ, ব্যবহার ও মূল্যের তথ্য" },
+    { icon: "time-outline", text: "ব্যক্তিগতকৃত স্ক্যান ইতিহাস" },
+    { icon: "shield-checkmark-outline", text: "নিরাপদ ও ব্যক্তিগত" },
   ];
 
   return (
@@ -39,9 +39,9 @@ export default function LoginScreen() {
         <View style={[styles.logoCircle, { backgroundColor: colors.primary }]}>
           <MaterialCommunityIcons name="shield-plus-outline" size={36} color="#fff" />
         </View>
-        <Text style={[styles.appName, { color: colors.primary }]}>Medi Scan AI</Text>
+        <Text style={[styles.appName, { color: colors.primary }]}>মেডি স্ক্যান AI</Text>
         <Text style={[styles.tagline, { color: colors.mutedForeground }]}>
-          Precision healthcare analysis at your fingertips.
+          আপনার আঙুলের ডগায় নির্ভুল স্বাস্থ্যসেবা বিশ্লেষণ।
         </Text>
       </View>
 
@@ -88,18 +88,18 @@ export default function LoginScreen() {
           ) : (
             <>
               <Ionicons name="log-in-outline" size={20} color="#fff" />
-              <Text style={styles.loginBtnText}>Log In to Continue</Text>
+              <Text style={styles.loginBtnText}>প্রবেশ করুন</Text>
             </>
           )}
         </TouchableOpacity>
 
         <Text style={[styles.disclaimer, { color: colors.outline }]}>
-          By continuing, you agree to our Terms of Service and Privacy Policy.
+          চালিয়ে যাওয়ার মাধ্যমে আপনি আমাদের পরিষেবার শর্তাবলী ও গোপনীয়তা নীতিতে সম্মত হচ্ছেন।
         </Text>
         <View style={styles.hipaaRow}>
           <Ionicons name="shield-checkmark-outline" size={14} color={colors.outline} />
           <Text style={[styles.hipaaText, { color: colors.outline }]}>
-            HIPAA Compliant Data Encryption
+            এনক্রিপ্টেড ডেটা সুরক্ষা
           </Text>
         </View>
       </View>

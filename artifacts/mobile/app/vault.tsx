@@ -31,10 +31,10 @@ Notifications.setNotificationHandler({
 });
 
 const FREQUENCY_OPTIONS: { key: ReminderSettings["frequency"]; label: string; hour: number; minute: number; icon: string }[] = [
-  { key: "morning",   label: "Morning",   hour: 8,  minute: 0,  icon: "sunny-outline" },
-  { key: "afternoon", label: "Afternoon", hour: 13, minute: 0,  icon: "partly-sunny-outline" },
-  { key: "evening",   label: "Evening",   hour: 19, minute: 0,  icon: "moon-outline" },
-  { key: "daily",     label: "Custom",    hour: 9,  minute: 0,  icon: "alarm-outline" },
+  { key: "morning",   label: "সকাল",   hour: 8,  minute: 0,  icon: "sunny-outline" },
+  { key: "afternoon", label: "দুপুর", hour: 13, minute: 0,  icon: "partly-sunny-outline" },
+  { key: "evening",   label: "সন্ধ্যা",   hour: 19, minute: 0,  icon: "moon-outline" },
+  { key: "daily",     label: "কাস্টম",    hour: 9,  minute: 0,  icon: "alarm-outline" },
 ];
 
 function ReminderModal({
@@ -72,8 +72,8 @@ function ReminderModal({
     await Notifications.cancelAllScheduledNotificationsAsync();
     const id = await Notifications.scheduleNotificationAsync({
       content: {
-        title: "Med Reminder",
-        body: `Time to take ${medicineName}`,
+        title: "ওষুধের রিমাইন্ডার",
+        body: `${medicineName} খাওয়ার সময় হয়েছে`,
         sound: true,
       },
       trigger: {
@@ -96,8 +96,8 @@ function ReminderModal({
         notificationId = await scheduleNotification(selected, option.hour, option.minute);
       } else if (Platform.OS !== "web") {
         Alert.alert(
-          "Notifications disabled",
-          "Enable notifications in Settings to receive med reminders. Your reminder has been saved."
+          "বিজ্ঞপ্তি অক্ষম",
+          "রিমাইন্ডার পেতে সেটিংসে বিজ্ঞপ্তি চালু করুন। আপনার রিমাইন্ডার সংরক্ষিত হয়েছে।"
         );
       }
 
@@ -136,7 +136,7 @@ function ReminderModal({
       <View style={[styles.sheet, { backgroundColor: colors.card }]}>
         <View style={[styles.sheetHandle, { backgroundColor: colors.outlineVariant }]} />
 
-        <Text style={[styles.sheetTitle, { color: colors.foreground }]}>Med Reminder</Text>
+        <Text style={[styles.sheetTitle, { color: colors.foreground }]}>ওষুধের রিমাইন্ডার</Text>
         <Text style={[styles.sheetSub, { color: colors.mutedForeground }]} numberOfLines={2}>
           {medicineName}
         </Text>
@@ -178,7 +178,7 @@ function ReminderModal({
           activeOpacity={0.85}
         >
           <Ionicons name="alarm" size={18} color="#fff" />
-          <Text style={styles.saveReminderText}>{saving ? "Saving…" : "Set Reminder"}</Text>
+          <Text style={styles.saveReminderText}>{saving ? "সংরক্ষণ হচ্ছে…" : "রিমাইন্ডার সেট করুন"}</Text>
         </TouchableOpacity>
 
         {existing?.enabled && (
@@ -188,12 +188,12 @@ function ReminderModal({
             disabled={saving}
             activeOpacity={0.8}
           >
-            <Text style={[styles.removeReminderText, { color: colors.destructive }]}>Remove Reminder</Text>
+            <Text style={[styles.removeReminderText, { color: colors.destructive }]}>রিমাইন্ডার সরান</Text>
           </TouchableOpacity>
         )}
 
         <TouchableOpacity style={styles.cancelBtn} onPress={onClose}>
-          <Text style={[styles.cancelText, { color: colors.mutedForeground }]}>Cancel</Text>
+          <Text style={[styles.cancelText, { color: colors.mutedForeground }]}>বাতিল</Text>
         </TouchableOpacity>
       </View>
     </Modal>
@@ -248,7 +248,7 @@ function VaultCard({
           <View style={[styles.reminderChip, { backgroundColor: colors.successContainer }]}>
             <Ionicons name="alarm" size={12} color={colors.success} />
             <Text style={[styles.reminderChipText, { color: colors.success }]}>
-              {vault.reminder!.frequency.charAt(0).toUpperCase() + vault.reminder!.frequency.slice(1)} reminder on
+              রিমাইন্ডার চালু আছে
             </Text>
           </View>
         )}
@@ -265,7 +265,7 @@ function VaultCard({
         >
           <Ionicons name={hasReminder ? "alarm" : "alarm-outline"} size={15} color={hasReminder ? colors.foreground : "#fff"} />
           <Text style={[styles.reminderBtnText, { color: hasReminder ? colors.foreground : "#fff" }]}>
-            Med Reminder
+            ওষুধের রিমাইন্ডার
           </Text>
         </TouchableOpacity>
       </View>
@@ -301,12 +301,12 @@ export default function VaultScreen() {
 
   async function handleRemove(scanId: string, name: string) {
     Alert.alert(
-      "Remove from My Meds",
-      `Remove "${name}" from your vault?`,
+      "আমার ওষুধ থেকে সরান",
+      `"${name}" আপনার ভল্ট থেকে সরাবেন?`,
       [
-        { text: "Cancel", style: "cancel" },
+        { text: "বাতিল", style: "cancel" },
         {
-          text: "Remove",
+          text: "সরান",
           style: "destructive",
           onPress: async () => {
             await removeFromVault(scanId);
@@ -326,8 +326,8 @@ export default function VaultScreen() {
           <Ionicons name="chevron-back" size={24} color={colors.foreground} />
         </TouchableOpacity>
         <View style={{ flex: 1 }}>
-          <Text style={[styles.headerTitle, { color: colors.foreground }]}>My Meds</Text>
-          <Text style={[styles.headerSub, { color: colors.mutedForeground }]}>Your personal medicine vault</Text>
+          <Text style={[styles.headerTitle, { color: colors.foreground }]}>আমার ওষুধ</Text>
+          <Text style={[styles.headerSub, { color: colors.mutedForeground }]}>আপনার ব্যক্তিগত ওষুধ ভান্ডার</Text>
         </View>
         <View style={[styles.headerBadge, { backgroundColor: colors.primary }]}>
           <Text style={styles.headerBadgeText}>{validItems.length}</Text>
@@ -345,9 +345,9 @@ export default function VaultScreen() {
             <View style={[styles.emptyIconWrap, { backgroundColor: colors.surfaceContainerLow }]}>
               <MaterialCommunityIcons name="shield-plus-outline" size={52} color={colors.outline} />
             </View>
-            <Text style={[styles.emptyTitle, { color: colors.foreground }]}>Your vault is empty</Text>
+            <Text style={[styles.emptyTitle, { color: colors.foreground }]}>আপনার ভল্ট খালি</Text>
             <Text style={[styles.emptySubtitle, { color: colors.mutedForeground }]}>
-              After scanning a medicine, tap the bookmark icon on its detail screen to add it here.
+              ওষুধ স্ক্যান করার পরে বিবরণ স্ক্রিনে বুকমার্ক আইকনে চাপুন এখানে যোগ করতে।
             </Text>
             <TouchableOpacity
               style={[styles.scanNowBtn, { backgroundColor: colors.primary }]}
@@ -355,7 +355,7 @@ export default function VaultScreen() {
               activeOpacity={0.85}
             >
               <Ionicons name="camera" size={18} color="#fff" />
-              <Text style={styles.scanNowText}>Scan a Medicine</Text>
+              <Text style={styles.scanNowText}>ওষুধ স্ক্যান করুন</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -363,7 +363,7 @@ export default function VaultScreen() {
         {validItems.length > 0 && (
           <View style={styles.list}>
             <Text style={[styles.listLabel, { color: colors.mutedForeground }]}>
-              {validItems.length} medicine{validItems.length !== 1 ? "s" : ""} saved
+              {validItems.length}টি ওষুধ সংরক্ষিত
             </Text>
             {validItems.map((v) => (
               <VaultCard

@@ -70,11 +70,11 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
 
       <View style={styles.content}>
         <Text style={[styles.title, { color: colors.foreground }]}>
-          Something went wrong
+          কিছু একটা ভুল হয়েছে
         </Text>
 
         <Text style={[styles.message, { color: colors.mutedForeground }]}>
-          Please reload the app to continue.
+          চালিয়ে যেতে অ্যাপটি পুনরায় লোড করুন।
         </Text>
 
         <Pressable
@@ -94,7 +94,7 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
               { color: colors.primaryForeground },
             ]}
           >
-            Try Again
+            আবার চেষ্টা করুন
           </Text>
         </Pressable>
       </View>
@@ -120,7 +120,7 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
                 ]}
               >
                 <Text style={[styles.modalTitle, { color: colors.foreground }]}>
-                  Error Details
+                  ত্রুটির বিবরণ
                 </Text>
                 <Pressable
                   onPress={() => setIsModalVisible(false)}

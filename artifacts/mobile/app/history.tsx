@@ -46,7 +46,7 @@ function HistoryCard({ item, onPress }: { item: LocalScanItem; onPress: () => vo
         <View style={styles.cardTopRow}>
           <View style={[styles.chip, { backgroundColor: item.identified ? colors.successContainer : colors.surfaceContainer }]}>
             <Text style={[styles.chipText, { color: item.identified ? colors.success : colors.mutedForeground }]}>
-              {item.identified ? "Identified" : "Unknown"}
+              {item.identified ? "শনাক্ত" : "অজানা"}
             </Text>
           </View>
           <Text style={[styles.timeText, { color: colors.outline }]}>{timeAgo(item.createdAt)}</Text>
@@ -79,7 +79,7 @@ export default function HistoryScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="chevron-back" size={24} color={colors.foreground} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.foreground }]}>Scan History</Text>
+        <Text style={[styles.headerTitle, { color: colors.foreground }]}>স্ক্যান ইতিহাস</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -96,16 +96,16 @@ export default function HistoryScreen() {
             <View style={[styles.emptyIcon, { backgroundColor: colors.surfaceContainerLow }]}>
               <MaterialCommunityIcons name="history" size={48} color={colors.outline} />
             </View>
-            <Text style={[styles.emptyTitle, { color: colors.foreground }]}>No scans yet</Text>
+            <Text style={[styles.emptyTitle, { color: colors.foreground }]}>এখনো কোনো স্ক্যান নেই</Text>
             <Text style={[styles.emptySubtitle, { color: colors.mutedForeground }]}>
-              Scan your first medicine to see it here
+              প্রথম ওষুধ স্ক্যান করুন এখানে দেখতে
             </Text>
             <TouchableOpacity
               style={[styles.scanBtn, { backgroundColor: colors.primary }]}
               onPress={() => router.push("/scan")}
             >
               <Ionicons name="camera" size={18} color="#fff" />
-              <Text style={[styles.scanBtnText, { color: "#fff" }]}>Scan Medicine</Text>
+              <Text style={[styles.scanBtnText, { color: "#fff" }]}>ওষুধ স্ক্যান করুন</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -113,7 +113,7 @@ export default function HistoryScreen() {
         {items.length > 0 && (
           <View style={styles.list}>
             <Text style={[styles.countLabel, { color: colors.mutedForeground }]}>
-              {items.length} scan{items.length !== 1 ? "s" : ""} saved on this device
+              {items.length}টি স্ক্যান এই ডিভাইসে সংরক্ষিত
             </Text>
             {items.map((item) => (
               <HistoryCard

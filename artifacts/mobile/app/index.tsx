@@ -79,9 +79,9 @@ function DrawerMenu({ visible, onClose }: { visible: boolean; onClose: () => voi
   }, [visible]);
 
   const menuItems = [
-    { icon: "information-circle-outline", label: "About This App", sub: "Version 1.0.0 • Medi Scan AI" },
-    { icon: "language-outline", label: "Change App Language", sub: "English (default)" },
-    { icon: "code-slash-outline", label: "About Developers", sub: "Built with care for your health" },
+    { icon: "information-circle-outline", label: "এই অ্যাপ সম্পর্কে", sub: "সংস্করণ ১.০.০ • মেডি স্ক্যান AI" },
+    { icon: "language-outline", label: "অ্যাপের ভাষা", sub: "বাংলা" },
+    { icon: "code-slash-outline", label: "ডেভেলপারদের সম্পর্কে", sub: "আপনার স্বাস্থ্যের কথা ভেবে তৈরি" },
   ];
 
   return (
@@ -179,9 +179,9 @@ export default function HomeScreen() {
 
         {/* Greeting */}
         <View style={styles.greeting}>
-          <Text style={[styles.greetingTitle, { color: colors.foreground }]}>Welcome Back</Text>
+          <Text style={[styles.greetingTitle, { color: colors.foreground }]}>স্বাগতম</Text>
           <Text style={[styles.greetingSubtitle, { color: colors.mutedForeground }]}>
-            Stay on top of your health journey today.
+            আজ আপনার স্বাস্থ্য যাত্রায় এগিয়ে থাকুন।
           </Text>
         </View>
 
@@ -194,14 +194,14 @@ export default function HomeScreen() {
           >
             <Ionicons name="camera" size={40} color="#fff" />
           </TouchableOpacity>
-          <Text style={[styles.scanLabel, { color: colors.primary }]}>Scan Medicine</Text>
+          <Text style={[styles.scanLabel, { color: colors.primary }]}>ওষুধ স্ক্যান করুন</Text>
         </View>
 
         {/* Recent Activity */}
         <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Recent Activity</Text>
+          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>সাম্প্রতিক কার্যক্রম</Text>
           <TouchableOpacity onPress={() => router.push("/history")}>
-            <Text style={[styles.viewHistory, { color: colors.primary }]}>View History</Text>
+            <Text style={[styles.viewHistory, { color: colors.primary }]}>ইতিহাস দেখুন</Text>
           </TouchableOpacity>
         </View>
 
@@ -209,7 +209,7 @@ export default function HomeScreen() {
           <View style={[styles.emptyCard, { backgroundColor: colors.surfaceContainerLow, borderColor: colors.outlineVariant }]}>
             <MaterialCommunityIcons name="line-scan" size={28} color={colors.outline} />
             <Text style={[styles.emptyText, { color: colors.mutedForeground }]}>
-              No scans yet. Tap "Scan Medicine" to get started.
+              এখনো কোনো স্ক্যান নেই। শুরু করতে "ওষুধ স্ক্যান করুন" এ চাপুন।
             </Text>
           </View>
         )}
@@ -228,7 +228,7 @@ export default function HomeScreen() {
               <View style={styles.cardRow}>
                 <View style={[styles.chip, { backgroundColor: scan.identified ? colors.successContainer : colors.surfaceContainer }]}>
                   <Text style={[styles.chipText, { color: scan.identified ? colors.success : colors.mutedForeground }]}>
-                    {scan.identified ? "Identified" : "Unknown"}
+                    {scan.identified ? "শনাক্ত" : "অজানা"}
                   </Text>
                 </View>
                 <Text style={[styles.cardTime, { color: colors.outline }]}>{timeAgo(scan.createdAt)}</Text>
@@ -248,10 +248,10 @@ export default function HomeScreen() {
           { backgroundColor: colors.card, borderTopColor: colors.outlineVariant, paddingBottom: bottomPad > 0 ? bottomPad : 12 },
         ]}
       >
-        <BottomTab icon="home" label="Home" active />
-        <BottomTab icon="time-outline" label="History" active={false} onPress={() => router.push("/history")} />
-        <BottomTab icon="shield-checkmark-outline" label="Vault" active={false} onPress={() => router.push("/vault")} />
-        <BottomTab icon="person-outline" label="Profile" active={false} onPress={() => router.push("/profile")} />
+        <BottomTab icon="home" label="হোম" active />
+        <BottomTab icon="time-outline" label="ইতিহাস" active={false} onPress={() => router.push("/history")} />
+        <BottomTab icon="shield-checkmark-outline" label="ভল্ট" active={false} onPress={() => router.push("/vault")} />
+        <BottomTab icon="person-outline" label="প্রোফাইল" active={false} onPress={() => router.push("/profile")} />
       </View>
     </View>
   );

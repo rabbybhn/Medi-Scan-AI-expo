@@ -76,7 +76,7 @@ export default function DetailScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="chevron-back" size={24} color={colors.foreground} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.foreground }]}>Scan Detail</Text>
+        <Text style={[styles.headerTitle, { color: colors.foreground }]}>স্ক্যান বিবরণ</Text>
         <TouchableOpacity onPress={toggleVault} style={styles.backBtn} disabled={vaultLoading}>
           <Ionicons
             name={inVault ? "bookmark" : "bookmark-outline"}
@@ -100,7 +100,7 @@ export default function DetailScreen() {
         {!isLoading && !item && (
           <View style={styles.center}>
             <MaterialCommunityIcons name="alert-circle-outline" size={48} color={colors.destructive} />
-            <Text style={[styles.statusText, { color: colors.mutedForeground }]}>Scan not found</Text>
+            <Text style={[styles.statusText, { color: colors.mutedForeground }]}>স্ক্যান পাওয়া যায়নি</Text>
           </View>
         )}
 
@@ -123,7 +123,7 @@ export default function DetailScreen() {
                     color={item.identified ? colors.success : colors.mutedForeground}
                   />
                   <Text style={[styles.badgeText, { color: item.identified ? colors.success : colors.mutedForeground }]}>
-                    {item.identified ? "Identified" : "Uncertain"}
+                    {item.identified ? "শনাক্ত" : "অনিশ্চিত"}
                   </Text>
                 </View>
               </View>
@@ -132,17 +132,17 @@ export default function DetailScreen() {
               </Text>
 
               <View style={styles.cards}>
-                <InfoCard icon="medical" label="Primary Use" value={item.primaryUse} accent="#0052cc" colors={colors} />
-                <InfoCard icon="flask-outline" label="Dosage" value={item.dosage} accent="#8b5cf6" colors={colors} />
-                <InfoCard icon="pricetag-outline" label="Approximate Price" value={item.approximatePrice} accent="#10b981" colors={colors} />
-                <InfoCard icon="information-circle-outline" label="General Information" value={item.generalInfo} accent="#06b6d4" colors={colors} />
-                <InfoCard icon="warning-outline" label="Warnings & Side Effects" value={item.warnings} accent="#f59e0b" colors={colors} />
+                <InfoCard icon="medical" label="প্রাথমিক ব্যবহার" value={item.primaryUse} accent="#0052cc" colors={colors} />
+                <InfoCard icon="flask-outline" label="ডোজ" value={item.dosage} accent="#8b5cf6" colors={colors} />
+                <InfoCard icon="pricetag-outline" label="আনুমানিক মূল্য" value={item.approximatePrice} accent="#10b981" colors={colors} />
+                <InfoCard icon="information-circle-outline" label="সাধারণ তথ্য" value={item.generalInfo} accent="#06b6d4" colors={colors} />
+                <InfoCard icon="warning-outline" label="সতর্কতা ও পার্শ্বপ্রতিক্রিয়া" value={item.warnings} accent="#f59e0b" colors={colors} />
               </View>
 
               <View style={[styles.disclaimer, { backgroundColor: colors.muted, borderColor: colors.outlineVariant }]}>
                 <Feather name="alert-triangle" size={13} color={colors.mutedForeground} />
                 <Text style={[styles.disclaimerText, { color: colors.mutedForeground }]}>
-                  For informational purposes only. Always consult a healthcare professional.
+                  শুধুমাত্র তথ্যের জন্য। সর্বদা একজন স্বাস্থ্যসেবা পেশাদারের পরামর্শ নিন।
                 </Text>
               </View>
 
@@ -151,7 +151,7 @@ export default function DetailScreen() {
                 onPress={() => router.push("/scan")}
               >
                 <Ionicons name="camera" size={18} color="#fff" />
-                <Text style={styles.scanAgainText}>Scan Another</Text>
+                <Text style={styles.scanAgainText}>আরেকটি স্ক্যান</Text>
               </TouchableOpacity>
             </View>
           </>

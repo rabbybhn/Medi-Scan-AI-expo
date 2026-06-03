@@ -96,8 +96,8 @@ function AnalyzingOverlay({
               <Animated.View style={[styles.spinnerRing, { transform: [{ rotate: spin }] }]} />
               <RNImage source={AppLogo} style={styles.spinnerLogo} resizeMode="contain" />
             </View>
-            <Text style={styles.analyzeTitle}>Analyzing Medicine</Text>
-            <Text style={styles.analyzeSubtitle}>AI is identifying your medicine</Text>
+            <Text style={styles.analyzeTitle}>ওষুধ বিশ্লেষণ করা হচ্ছে</Text>
+            <Text style={styles.analyzeSubtitle}>AI আপনার ওষুধ শনাক্ত করছে</Text>
             <View style={styles.dots}>
               <Animated.View style={[styles.dot, { opacity: dotAnim1 }]} />
               <Animated.View style={[styles.dot, { opacity: dotAnim2 }]} />
@@ -107,10 +107,10 @@ function AnalyzingOverlay({
         ) : (
           <View style={styles.analyzeCard}>
             <Ionicons name="alert-circle-outline" size={48} color="#ef4444" />
-            <Text style={styles.analyzeTitle}>Analysis Failed</Text>
+            <Text style={styles.analyzeTitle}>বিশ্লেষণ ব্যর্থ হয়েছে</Text>
             <Text style={styles.analyzeSubtitle}>{errorMsg}</Text>
             <TouchableOpacity style={styles.retryBtn} onPress={onRetry}>
-              <Text style={styles.retryBtnText}>Try Again</Text>
+              <Text style={styles.retryBtnText}>আবার চেষ্টা করুন</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -184,7 +184,7 @@ export default function ScanScreen() {
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       router.replace({ pathname: "/detail", params: { scanId: saved.id } });
     } catch {
-      setErrorMsg("Could not analyze the medicine. Check your connection and try again.");
+      setErrorMsg("ওষুধ বিশ্লেষণ করা সম্ভব হয়নি। আপনার সংযোগ পরীক্ষা করুন এবং আবার চেষ্টা করুন।");
       setPhase("error");
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
@@ -220,10 +220,10 @@ export default function ScanScreen() {
           <Ionicons name="chevron-back" size={22} color={colors.primary} />
         </TouchableOpacity>
         <MaterialCommunityIcons name="camera-off" size={64} color={colors.outline} />
-        <Text style={[styles.permissionTitle, { color: colors.foreground }]}>Camera Access Needed</Text>
-        <Text style={[styles.permissionSubtitle, { color: colors.mutedForeground }]}>Point your camera at any medicine to identify it instantly</Text>
+        <Text style={[styles.permissionTitle, { color: colors.foreground }]}>ক্যামেরা অ্যাক্সেস প্রয়োজন</Text>
+        <Text style={[styles.permissionSubtitle, { color: colors.mutedForeground }]}>যেকোনো ওষুধে ক্যামেরা তাক করুন এবং তাৎক্ষণিক তথ্য পান</Text>
         <TouchableOpacity style={[styles.permissionBtn, { backgroundColor: colors.primary }]} onPress={requestPermission}>
-          <Text style={[styles.permissionBtnText, { color: colors.primaryForeground }]}>Allow Camera</Text>
+          <Text style={[styles.permissionBtnText, { color: colors.primaryForeground }]}>ক্যামেরা অনুমতি দিন</Text>
         </TouchableOpacity>
       </View>
     );
@@ -245,12 +245,12 @@ export default function ScanScreen() {
               <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
                 <Ionicons name="chevron-back" size={26} color="#fff" />
               </TouchableOpacity>
-              <Text style={styles.headerTitle}>Scan Medicine</Text>
+              <Text style={styles.headerTitle}>ওষুধ স্ক্যান করুন</Text>
               <TouchableOpacity style={styles.headerBtn} onPress={() => setFacing(f => f === "back" ? "front" : "back")}>
                 <Ionicons name="camera-reverse-outline" size={26} color="#fff" />
               </TouchableOpacity>
             </View>
-            <Text style={styles.headerSubtitle}>Point at the label or packaging</Text>
+            <Text style={styles.headerSubtitle}>লেবেল বা প্যাকেজিংয়ের দিকে তাক করুন</Text>
           </LinearGradient>
 
           {/* Scan frame corners */}
@@ -261,7 +261,7 @@ export default function ScanScreen() {
               <View style={[styles.corner, styles.cornerBL]} />
               <View style={[styles.corner, styles.cornerBR]} />
               <View style={styles.frameHint}>
-                <Text style={styles.frameHintText}>Center the medicine label</Text>
+                <Text style={styles.frameHintText}>ওষুধের লেবেল কেন্দ্রে রাখুন</Text>
               </View>
             </View>
           </View>
@@ -277,7 +277,7 @@ export default function ScanScreen() {
                   <Ionicons name="camera" size={32} color="#fff" />
                 </Pressable>
               </Animated.View>
-              <Text style={styles.captureLabel}>Tap to Capture</Text>
+              <Text style={styles.captureLabel}>ক্যাপচার করতে চাপুন</Text>
             </View>
           </LinearGradient>
         </>
