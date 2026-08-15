@@ -1,0 +1,27 @@
+name: Create Production Builds
+
+on:
+  # Run manually: eas workflow:run .eas/workflows/create-production-builds.yml
+  workflow_dispatch: {}
+  # Requires the Expo GitHub app installed and this repo linked to the EAS project.
+  push:
+    branches: ['main']
+
+concurrency:
+  cancel_in_progress: true
+  group: ${{ workflow.filename }}-${{ github.ref }}
+
+jobs:
+  build_android:
+    name: Build Android
+    type: build
+    params:
+      platform: android
+      profile: production
+
+  build_ios:
+    name: Build iOS
+    type: build
+    params:
+      platform: ios
+      profile: production
