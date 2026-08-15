@@ -32,7 +32,9 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { LanguageProvider } from "@/hooks/useLanguage";
 
-Appearance.setColorScheme("light");
+// react-native-web does not implement setColorScheme, and calling it there
+// throws before the router mounts (blank red-box screen in the web preview).
+Appearance.setColorScheme?.("light");
 
 if (process.env.EXPO_PUBLIC_DOMAIN) {
   setBaseUrl(`https://${process.env.EXPO_PUBLIC_DOMAIN}`);
